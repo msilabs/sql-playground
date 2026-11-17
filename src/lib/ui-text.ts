@@ -43,9 +43,11 @@ export const ui = {
   shareFailed: "কপি করা গেল না।",
   sharedLoaded: "শেয়ার করা query editor-এ বসানো হয়েছে। দেখে নিয়ে চালান।",
 
-  datasetLabel: "ডেটা",
   schemaTitle: "Table",
-  schemaToggle: "table-এর তালিকা দেখান বা লুকান",
+  schemaHint: "নাম চাপলে column-গুলো দেখা যাবে।",
+  insertTable: "editor-এ বসান",
+  tryOtherDataset: "স্কুলের ডেটায় অনুশীলন করুন",
+  backToMainDataset: "অনলাইন দোকানের ডেটায় ফিরুন",
   rowCount: (n: number) => `${bn(n)}টা row`,
   viewTable: "দেখুন",
   viewTableLabel: (t: string) => `${t} table-এর row দেখুন`,
@@ -91,6 +93,11 @@ export const ui = {
   joinHover: "কোনো row-এর ওপর মাউস রাখুন বা ট্যাপ করুন: তার জোড়াগুলো আলাদা করে দেখা যাবে।",
   crossTooMany: "CROSS JOIN-এ প্রতিটা row প্রতিটা row-এর সাথে জোড়া লাগে, লাইন আঁকার জন্য অনেক বেশি।",
 
+  tabsLabel: "অংশ বদলান",
+  tabMission: "মিশন",
+  tabWork: "লিখুন ও ফল",
+  tabInsight: "ভেতরে কী হলো",
+
   missionTitle: "মিশন",
   missionOf: (n: number, total: number) => `মিশন ${bn(n)} / ${bn(total)}`,
   progress: (done: number, total: number) => `${bn(done)} / ${bn(total)}টা কাজ শেষ`,
@@ -103,7 +110,7 @@ export const ui = {
   switchToMission: "অনলাইন দোকানে যান",
   passed: "ঠিক হয়েছে! পরের কাজ খুলেছে।",
   missionPassed: (title: string) => `"${title}" শেষ! পরের মিশন খুলেছে।`,
-  allDone: "সব মিশন শেষ! এখন নিজের মতো query লিখে খেলুন, বা স্কুলের dataset-এ চেষ্টা করুন।",
+  allDone: "সব মিশন শেষ! এখন নিজের মতো query লিখে খেলুন, বা নতুন ডেটায় হাত পাকান।",
   failColumns: (actual: number, expected: number) => `প্রায় হয়েছে। আপনার ফলে column ${bn(actual)}টা, দরকার ${bn(expected)}টা।`,
   failRows: (extra: number, missing: number) => {
     const parts = [];

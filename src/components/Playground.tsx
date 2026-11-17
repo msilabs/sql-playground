@@ -33,6 +33,8 @@ import { SchemaPanel } from "./SchemaPanel";
 import { ThemeToggle } from "./ThemeToggle";
 
 type DbStatus = "loading" | "ready" | "running" | "failed";
+/** ছোট পর্দায় একবারে একটা অংশ; বড় পর্দায় তিনটাই পাশাপাশি */
+type Tab = "mission" | "work" | "insight";
 
 const buttonOutline =
   "rounded-lg px-2.5 py-2 text-sm font-semibold text-teal ring-1 ring-teal/30 transition hover:bg-teal/5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent sm:px-3";
@@ -55,6 +57,9 @@ export function Playground() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [tab, setTab] = useState<Tab>("work");
+  /** কোন insight দেখা হয়ে গেছে (tab-এ নতুন ফলের বিন্দু দেখাতে) */
+  const [seenInsight, setSeenInsight] = useState(0);
   const engineRef = useRef<WorkerEngine | null>(null);
   const editorRef = useRef<EditorHandle>(null);
   const runId = useRef(0);
@@ -252,14 +257,31 @@ export function Playground() {
 
   const applySolution = (sql: string) => {
     setEditor(sql);
-    editorRef.current?.focus();
+    setTab("work");
+    // ছোট পর্দায় editor এখন লুকানো ছিল; tab বদলের পরের frame-এ focus দিই
+    requestAnimationFrame(() => editorRef.current?.focus());
+  };
+
+  const insertText = (text: string) => {
+    setTab("work");
+    requestAnimationFrame(() => editorRef.current?.insert(text));
   };
 
   const viewTable = (table: string) => {
     const sql = `SELECT * FROM ${/^[a-z_][a-z0-9_]*$/i.test(table) ? table : `"${table}"`} LIMIT 50;`;
     setEditor(sql);
+    setTab("work");
     void run(sql);
   };
+
+  const showTab = (next: Tab) => {
+    setTab(next);
+    if (next === "insight" && insight.status === "ready") setSeenInsight(insight.id);
+    window.scrollTo({ top: 0 });
+  };
+
+  const insightId = insight.status === "ready" ? insight.id : 0;
+  const unseenInsight = insightId > seenInsight && tab !== "insight";
 
   // মোডাল খোলা থাকলে Tab শুধু মোডালের বোতামগুলোর মধ্যেই ঘোরে
   const trapFocus = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -338,7 +360,7 @@ export function Playground() {
       </header>
 
       <main className="mx-auto grid w-full max-w-[1600px] flex-1 items-start gap-4 p-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_minmax(0,30rem)]">
-        <aside className="flex min-w-0 flex-col gap-4 lg:row-span-2 xl:row-span-1">
+        <aside className={`${tab === "mission" ? "flex" : "hidden"} min-w-0 flex-col gap-4 lg:row-span-2 lg:flex xl:row-span-1`}>
           <MissionPanel
             step={session.step}
             onMissionDataset={session.dataset === MISSION_DATASET}
@@ -352,19 +374,22 @@ export function Playground() {
               update((s) => ({ ...s, step: 0 }));
               setFeedback(null);
             }}
+            onTryOther={() => changeDataset("school")}
             onSwitchDataset={() => changeDataset(MISSION_DATASET)}
           />
           <SchemaPanel
+            key={session.dataset}
             schema={schema}
             dataset={session.dataset}
+            editorText={session.editor}
             disabled={busy}
             onDataset={changeDataset}
-            onInsert={(text) => editorRef.current?.insert(text)}
+            onInsert={insertText}
             onView={viewTable}
           />
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-4">
+        <div className={`${tab === "work" ? "flex" : "hidden"} min-w-0 flex-col gap-4 lg:flex`}>
           <section aria-label={ui.editorLabel} className="rounded-2xl bg-surface p-4 ring-1 ring-line/10">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -410,17 +435,45 @@ export function Playground() {
           <ResultPanel output={output} busy={dbStatus === "running"} />
         </div>
 
-        <div className="min-w-0 lg:col-start-2 xl:col-start-3">
+        <div className={`${tab === "insight" ? "block" : "hidden"} min-w-0 lg:col-start-2 lg:block xl:col-start-3`}>
           <InsightPanel insight={insight} />
         </div>
       </main>
 
-      <footer className="py-4 text-center text-xs text-muted">
+      <footer className="py-4 pb-24 text-center text-xs text-muted lg:pb-4">
         {ui.footer} ·{" "}
         <a className="underline hover:text-fg" href="https://github.com/msilabs/sql-playground">
           {ui.github}
         </a>
       </footer>
+
+      <nav
+        aria-label={ui.tabsLabel}
+        className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-3 gap-1 border-t border-line/10 bg-surface/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden"
+      >
+        {(
+          [
+            ["mission", ui.tabMission],
+            ["work", ui.tabWork],
+            ["insight", ui.tabInsight],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => showTab(id)}
+            aria-current={tab === id ? "page" : undefined}
+            className={`relative rounded-xl px-2 py-2.5 text-sm font-semibold transition ${
+              tab === id ? "bg-ink text-mint" : "text-muted hover:text-fg"
+            }`}
+          >
+            {label}
+            {id === "insight" && unseenInsight && (
+              <span aria-hidden className="absolute right-2 top-1.5 h-2 w-2 rounded-full bg-sun" />
+            )}
+          </button>
+        ))}
+      </nav>
 
       {confirmReset && (
         <div

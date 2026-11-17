@@ -17,6 +17,8 @@ interface Props {
   readonly onUseSolution: (sql: string) => void;
   readonly onSkip: () => void;
   readonly onRestart: () => void;
+  /** সব মিশন শেষে অন্য dataset-এ অনুশীলন */
+  readonly onTryOther: () => void;
   readonly onSwitchDataset: () => void;
 }
 
@@ -61,7 +63,7 @@ function FeedbackView({ feedback }: { feedback: Feedback }) {
   );
 }
 
-export function MissionPanel({ step, onMissionDataset, feedback, onUseSolution, onSkip, onRestart, onSwitchDataset }: Props) {
+export function MissionPanel({ step, onMissionDataset, feedback, onUseSolution, onSkip, onRestart, onTryOther, onSwitchDataset }: Props) {
   const at = missionAt(step);
   const mission = MISSIONS[at.index];
   // কাজ বদলালে ইঙ্গিত আর সমাধান আবার লুকানো (key দিয়ে)
@@ -88,9 +90,14 @@ export function MissionPanel({ step, onMissionDataset, feedback, onUseSolution, 
         <div className="mt-3 space-y-3">
           {feedback && <FeedbackView feedback={feedback} />}
           <p className="text-sm text-fg">{ui.allDone}</p>
-          <button type="button" onClick={onRestart} className="rounded-lg px-3 py-1.5 text-sm font-semibold text-teal ring-1 ring-teal/30 hover:bg-teal/5">
-            {ui.restart}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={onTryOther} className="rounded-lg bg-fg px-3 py-1.5 text-sm font-semibold text-surface hover:opacity-90">
+              {ui.tryOtherDataset}
+            </button>
+            <button type="button" onClick={onRestart} className="rounded-lg px-3 py-1.5 text-sm font-semibold text-teal ring-1 ring-teal/30 hover:bg-teal/5">
+              {ui.restart}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="mt-3">
