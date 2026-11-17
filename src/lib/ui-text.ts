@@ -69,7 +69,7 @@ export const ui = {
   originalError: "SQLite-এর আসল বার্তা",
   explainTitle: "কী হলো",
 
-  insightTitle: "ভেতরে কী হলো",
+  insightTitle: "query কীভাবে চলে",
   stagesTab: "ধাপে ধাপে",
   joinTab: "JOIN",
   insightEmpty: "একটা SELECT query চালালে এখানে দেখা যাবে SQLite ধাপে ধাপে কী করে।",
@@ -94,9 +94,9 @@ export const ui = {
   crossTooMany: "CROSS JOIN-এ প্রতিটা row প্রতিটা row-এর সাথে জোড়া লাগে, লাইন আঁকার জন্য অনেক বেশি।",
 
   tabsLabel: "অংশ বদলান",
-  tabMission: "মিশন",
+  tabMission: "মিশন ও ডেটা",
   tabWork: "লিখুন ও ফল",
-  tabInsight: "ভেতরে কী হলো",
+  tabInsight: "কীভাবে চলে",
 
   missionTitle: "মিশন",
   missionOf: (n: number, total: number) => `মিশন ${bn(n)} / ${bn(total)}`,

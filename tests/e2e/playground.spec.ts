@@ -35,7 +35,7 @@ test("query চালালে ফল, বাংলা ব্যাখ্যা 
   await page.getByRole("button", { name: /চালান/ }).click();
   await expect(page.getByText("ফল: ৯টা row।")).toBeVisible();
   await expect(page.getByRole("cell", { name: "স্মার্ট ওয়াচ" }).first()).toBeVisible();
-  await openTab(page, "ভেতরে কী হলো");
+  await openTab(page, "কীভাবে চলে");
   await page.getByRole("button", { name: "২. WHERE" }).click();
   await expect(page.getByText(/২০টা row-এর মধ্যে ৯টা শর্ত মেনেছে/)).toBeVisible();
 });
@@ -49,7 +49,7 @@ test("ভুল query-তে বাংলায় ভুল আর ইঙ্গ
 
 test("JOIN-এর ছবি", async ({ page }) => {
   await runSql(page, "SELECT c.name, o.id FROM customers c LEFT JOIN orders o ON o.customer_id = c.id");
-  await openTab(page, "ভেতরে কী হলো");
+  await openTab(page, "কীভাবে চলে");
   await page.getByRole("tab", { name: "JOIN" }).click();
   await expect(page.getByText("LEFT JOIN ON o.customer_id = c.id")).toBeVisible();
   await expect(page.getByRole("tabpanel").getByText("NULL", { exact: true }).first()).toBeVisible();
@@ -57,7 +57,7 @@ test("JOIN-এর ছবি", async ({ page }) => {
 
 test("mission-এর কাজ শেষ হলে অগ্রগতি বাড়ে", async ({ page }) => {
   await runSql(page, "SELECT * FROM products;");
-  await openTab(page, "মিশন");
+  await openTab(page, "মিশন ও ডেটা");
   await expect(page.getByText("ঠিক হয়েছে! পরের কাজ খুলেছে।")).toBeVisible();
   await expect(page.getByText("১ / ২৮টা কাজ শেষ")).toBeVisible();
 });
@@ -109,7 +109,7 @@ test("editor-এর রঙিন লেখা আর textarea-র লেখা �
 });
 
 test("table ভাঁজ করা থাকে, query-তে নাম থাকলে খোলে, চাপলে খোলে-বন্ধ হয়", async ({ page }) => {
-  await openTab(page, "মিশন");
+  await openTab(page, "মিশন ও ডেটা");
   const orders = tableToggle(page, "orders");
   await expect(orders).toHaveAttribute("aria-expanded", "false");
   // শুরুর query-তে products আছে, তাই সেটা খোলা
@@ -122,13 +122,13 @@ test("table ভাঁজ করা থাকে, query-তে নাম থা�
 });
 
 test("স্কুলের ডেটায় গিয়ে আবার দোকানে ফেরা যায়", async ({ page }) => {
-  await openTab(page, "মিশন");
+  await openTab(page, "মিশন ও ডেটা");
   await page.getByRole("button", { name: "স্কুলের ডেটায় অনুশীলন করুন" }).click();
   await waitReady(page);
-  await openTab(page, "মিশন");
+  await openTab(page, "মিশন ও ডেটা");
   await expect(tableToggle(page, "students")).toBeVisible();
   await page.getByRole("button", { name: "অনলাইন দোকানের ডেটায় ফিরুন" }).click();
   await waitReady(page);
-  await openTab(page, "মিশন");
+  await openTab(page, "মিশন ও ডেটা");
   await expect(tableToggle(page, "customers")).toBeVisible();
 });

@@ -84,16 +84,7 @@ export function StageViewer({ result }: { result: StagesResult }) {
         ))}
       </ol>
 
-      <div className="mt-3 rounded-xl p-0.5">
-        <p className="text-xs text-muted">
-          {ui.stepOf(index + 1, stages.length)} · <span className="font-semibold text-fg">{current.title}</span>
-        </p>
-        <div className="mt-2">
-          <StageBody key={current.key} stage={current} />
-        </div>
-      </div>
-
-      <div className="mt-3 flex justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
@@ -102,6 +93,9 @@ export function StageViewer({ result }: { result: StagesResult }) {
         >
           {ui.prev}
         </button>
+        <span className="text-xs text-muted" aria-live="polite">
+          {ui.stepOf(index + 1, stages.length)}
+        </span>
         <button
           type="button"
           onClick={() => setIndex((i) => Math.min(stages.length - 1, i + 1))}
@@ -110,6 +104,13 @@ export function StageViewer({ result }: { result: StagesResult }) {
         >
           {ui.next}
         </button>
+      </div>
+
+      <div className="mt-3">
+        <p className="text-sm font-semibold text-fg">{current.title}</p>
+        <div className="mt-2">
+          <StageBody key={current.key} stage={current} />
+        </div>
       </div>
     </div>
   );
