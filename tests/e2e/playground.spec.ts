@@ -132,3 +132,17 @@ test("স্কুলের ডেটায় গিয়ে আবার দ�
   await openTab(page, "মিশন ও ডেটা");
   await expect(tableToggle(page, "customers")).toBeVisible();
 });
+
+test("SEO: title, canonical, Open Graph, Twitter card আর structured data", async ({ page }) => {
+  const meta = (selector: string) => page.locator(selector).first().getAttribute("content");
+  await expect(page).toHaveTitle(/SQL Playground: বাংলায় SQL শেখার জায়গা/);
+  expect(await page.locator('link[rel="canonical"]').getAttribute("href")).toBe("https://msilabs.github.io/sql-playground/");
+  expect(await meta('meta[property="og:image"]')).toBe("https://msilabs.github.io/sql-playground/og.png");
+  expect(await meta('meta[property="og:image:width"]')).toBe("1280");
+  expect(await meta('meta[property="og:image:height"]')).toBe("640");
+  expect(await meta('meta[property="og:locale"]')).toBe("bn_BD");
+  expect(await meta('meta[name="twitter:card"]')).toBe("summary_large_image");
+  expect(await meta('meta[name="description"]')).toContain("আসল SQLite");
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').first().textContent()) ?? "{}");
+  expect(ld["@type"]).toBe("WebApplication");
+});
