@@ -246,4 +246,12 @@ test('e2e: ফোনের মাপে কিছু পাশে scroll হয�
         await sleep(400);
         assert.ok(await js('document.documentElement.scrollWidth <= 390'), `${path || '/'} পাশে scroll হয়`);
     }
+    // ধাপে ধাপে খুললেও চওড়া table বাক্সের ভেতরে থাকে (৩ table-এর JOIN, অনেক column), ডেস্কটপ আর ফোন দুই মাপেই
+    for (const width of [1280, 390]) {
+        await open('learn/null-functions/', width, 900);
+        await waitFor("[...document.querySelectorAll('#lessonBody .try')].some((t) => t.querySelector('textarea').value.includes('LEFT JOIN order_items') && t.querySelector('.tbl'))", 'join box ran');
+        await js("[...document.querySelectorAll('#lessonBody .try')].find((t) => t.querySelector('textarea').value.includes('LEFT JOIN order_items')).querySelector('.steps-btn').click()");
+        await waitFor("!!document.querySelector('#lessonBody .stage-viewer .tbl')", 'steps shown');
+        assert.ok(await js(`document.documentElement.scrollWidth <= ${width}`), `ধাপে ধাপে খুললে ${width}px-এ পাশে scroll হয়`);
+    }
 });
