@@ -1,0 +1,9 @@
+{
+    "title": "দ্বিতীয় সর্বোচ্চ দাম",
+    "level": "কঠিন",
+    "learn": "subquery",
+    "task": "পণ্যের দ্বিতীয় সর্বোচ্চ দাম কত? উত্তর শুধু একটা সংখ্যা।",
+    "hint": "সবচেয়ে বেশি দামের চেয়ে কম দামগুলোর মধ্যে সবচেয়ে বেশি: subquery দিয়ে `max`।",
+    "solution": "SELECT max(price) FROM products WHERE price < (SELECT max(price) FROM products);",
+    "check": "rows"
+}

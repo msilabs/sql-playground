@@ -1,0 +1,9 @@
+{
+    "title": "১০০০ টাকার বেশি দামি পণ্য",
+    "level": "সহজ",
+    "learn": "where",
+    "task": "১০০০ টাকার বেশি দামের পণ্যগুলোর নাম আর দাম দেখুন।",
+    "hint": "FROM-এর পরে `WHERE price > 1000`",
+    "solution": "SELECT name, price FROM products WHERE price > 1000;",
+    "check": "rows"
+}

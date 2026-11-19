@@ -1,0 +1,9 @@
+{
+    "title": "মোট কয়টা অর্ডার",
+    "level": "সহজ",
+    "learn": "count",
+    "task": "মোট কয়টা অর্ডার আছে?",
+    "hint": "`SELECT count(*) FROM …`",
+    "solution": "SELECT count(*) FROM orders;",
+    "check": "rows"
+}

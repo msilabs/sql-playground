@@ -1,0 +1,344 @@
+<!-- data.site থেকে নাম আর রেপো নেয়। রঙ আসে প্রজেক্টের --bg, --surface, --ink, --muted, --line, --accent টোকেন থেকে। -->
+<template>
+    <header class="site-header" data-repo="{{ data.site.repo.replace('https://github.com/', '') }}" data-lang="{{ data.site.lang }}">
+        <div class="inner">
+            <a class="brand" href="/">
+                <img class="mark" src="/favicon.svg" alt="" width="34" height="34">
+                <span class="text">
+                    <span class="name">{{ data.site.name }}</span>
+                    <span class="by">by <b>msilabs</b></span>
+                </span>
+            </a>
+            <nav class="nav" id="siteNav" aria-label="মূল মেনু">
+                <a href="/" class="{{ route.path === '/' ? 'on' : '' }}">Playground</a>
+                <a href="/learn/" class="{{ route.path.startsWith('/learn/') ? 'on' : '' }}">Learn</a>
+                <a href="/challenge/" class="{{ route.path.startsWith('/challenge/') ? 'on' : '' }}">Challenge</a>
+            </nav>
+            <div class="actions">
+                <button class="icon-btn theme" type="button" aria-pressed="false" aria-label="{{ data.site.lang === 'bn' ? 'ডার্ক মোড' : 'Dark mode' }}" title="{{ data.site.lang === 'bn' ? 'আলো/অন্ধকার থিম' : 'Toggle theme' }}">
+                    <svg class="moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg class="sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></g></svg>
+                </button>
+                <a class="star" href="{{ data.site.repo }}" target="_blank" rel="noopener" aria-label="{{ data.site.lang === 'bn' ? 'GitHub-এ স্টার দিন' : 'Star on GitHub' }}">
+                    <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+                    <span class="label">Star</span>
+                    <svg class="star-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M8 .25a.75.75 0 0 1 .67.42l1.88 3.81 4.2.61a.75.75 0 0 1 .42 1.28l-3.04 2.96.72 4.19a.75.75 0 0 1-1.09.79L8 12.33l-3.76 1.98a.75.75 0 0 1-1.09-.79l.72-4.19L.83 6.37a.75.75 0 0 1 .42-1.28l4.2-.61L7.33.67A.75.75 0 0 1 8 .25Z"/></svg>
+                    <span class="count" hidden></span>
+                </a>
+                <button class="icon-btn menu" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="মেনু">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+</template>
+
+<style>
+    .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        -webkit-backdrop-filter: saturate(1.6) blur(14px);
+        backdrop-filter: saturate(1.6) blur(14px);
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    }
+
+    .inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        max-width: var(--page-max, 1180px);
+        min-height: 60px;
+        margin: 0 auto;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    .brand {
+        display: flex;
+        flex: 0 1 auto;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .mark {
+        flex: none;
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.15;
+    }
+
+    .name {
+        overflow: hidden;
+        font-family: var(--f-display, inherit);
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .by {
+        color: var(--muted);
+        font-size: 11.5px;
+        font-weight: 500;
+    }
+
+    .by b {
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    .nav {
+        display: flex;
+        flex: 1 1 auto;
+        gap: 2px;
+        margin-left: 18px;
+    }
+
+    .nav a {
+        padding: 7px 12px;
+        border-radius: 9px;
+        color: var(--muted);
+        font-size: 14.5px;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .nav a:hover {
+        color: var(--ink);
+        background: var(--surface);
+    }
+
+    .nav a.on {
+        color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    .icon-btn.menu {
+        display: none;
+    }
+
+    .actions {
+        display: flex;
+        flex: none;
+        margin-left: auto;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .icon-btn,
+    .star {
+        display: inline-flex;
+        align-items: center;
+        height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+        transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .icon-btn {
+        justify-content: center;
+        width: 36px;
+        padding: 0;
+        cursor: pointer;
+    }
+
+    .star {
+        gap: 7px;
+        padding: 0 12px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .icon-btn:hover,
+    .star:hover {
+        border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+        box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+        transform: translateY(-1px);
+    }
+
+    .icon-btn:focus-visible,
+    .star:focus-visible,
+    .brand:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .star-icon {
+        color: #e3b341;
+    }
+
+    .count {
+        margin-left: 1px;
+        padding-left: 8px;
+        border-left: 1px solid var(--line);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .theme .sun,
+    .theme[aria-pressed="true"] .moon {
+        display: none;
+    }
+
+    .theme[aria-pressed="true"] .sun {
+        display: block;
+    }
+
+    @media (max-width: 760px) {
+        .icon-btn.menu {
+            display: inline-flex;
+        }
+
+        .nav {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            margin: 0;
+            padding: 8px 12px 12px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--line);
+            box-shadow: 0 12px 24px -16px rgb(0 0 0 / 0.35);
+        }
+
+        .nav.open {
+            display: flex;
+        }
+
+        .nav a {
+            padding: 11px 12px;
+            font-size: 15.5px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .inner {
+            gap: 8px;
+            min-height: 52px;
+        }
+
+        .brand {
+            gap: 8px;
+        }
+
+        .mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+        }
+
+        .name {
+            font-size: 14.5px;
+        }
+
+        .by {
+            font-size: 10.5px;
+        }
+
+        .actions {
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+        }
+
+        .star {
+            height: 32px;
+            gap: 5px;
+            padding: 0 9px;
+            border-radius: 9px;
+            font-size: 13px;
+        }
+
+        .icon-btn svg,
+        .star svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .star .label {
+            display: none;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .icon-btn,
+        .star {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    const root = document.documentElement;
+    const themeBtn = $el.querySelector('.theme');
+    const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+    const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : darkQuery.matches);
+    const syncTheme = () => themeBtn.setAttribute('aria-pressed', String(isDark()));
+    syncTheme();
+    darkQuery.addEventListener('change', syncTheme);
+    themeBtn.addEventListener('click', () => {
+        const next = isDark() ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('msilabs-theme', next); } catch (e) {}
+        syncTheme();
+        document.dispatchEvent(new CustomEvent('theme:change', { detail: next }));
+    });
+
+    const menuBtn = $el.querySelector('.menu');
+    const nav = $el.querySelector('.nav');
+    const setMenu = (open) => {
+        nav.classList.toggle('open', open);
+        menuBtn.setAttribute('aria-expanded', String(open));
+    };
+    menuBtn.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    document.addEventListener('click', (e) => { if (!$el.contains(e.target)) setMenu(false); });
+
+    const repo = $el.dataset.repo;
+    const countEl = $el.querySelector('.count');
+    const toLocalDigits = (s) => ($el.dataset.lang === 'bn' ? s.replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : s);
+    const short = (n) => (n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n));
+    const showStars = (n) => {
+        countEl.textContent = toLocalDigits(short(n));
+        countEl.hidden = false;
+    };
+    const cacheKey = 'gh-stars:' + repo;
+    let cached = null;
+    try { cached = JSON.parse(sessionStorage.getItem(cacheKey)); } catch (e) {}
+    if (cached && Date.now() - cached.at < 3600000) {
+        showStars(cached.n);
+    } else {
+        fetch('https://api.github.com/repos/' + repo)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+                if (!d || typeof d.stargazers_count !== 'number') return;
+                showStars(d.stargazers_count);
+                try { sessionStorage.setItem(cacheKey, JSON.stringify({ n: d.stargazers_count, at: Date.now() })); } catch (e) {}
+            })
+            .catch(() => {});
+    }
+</script>

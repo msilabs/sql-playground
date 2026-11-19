@@ -1,0 +1,9 @@
+{
+    "title": "সবচেয়ে বেশি কেনা ৩ জন",
+    "level": "কঠিন",
+    "learn": "group-by",
+    "task": "সবচেয়ে বেশি কেনাকাটা করা ৩ জন গ্রাহকের নাম আর মোট টাকা দেখুন, বেশি থেকে কম। শুধু `paid` অর্ডার ধরুন; টাকা = `quantity * unit_price`-এর যোগফল।",
+    "hint": "`customers` → `orders` → `order_items` তিন table জোড়া, `WHERE o.status = 'paid'`, `GROUP BY c.id`, `ORDER BY` মোট `DESC`, `LIMIT 3`।",
+    "solution": "SELECT c.name, sum(oi.quantity * oi.unit_price) AS total\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nJOIN order_items oi ON oi.order_id = o.id\nWHERE o.status = 'paid'\nGROUP BY c.id\nORDER BY total DESC\nLIMIT 3;",
+    "check": "ordered"
+}

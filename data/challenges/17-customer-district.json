@@ -1,0 +1,9 @@
+{
+    "title": "গ্রাহকের পাশে জেলার নাম",
+    "level": "মাঝারি",
+    "learn": "inner-join",
+    "task": "প্রতিটা গ্রাহকের নামের পাশে তার জেলার নাম দেখুন। কয়জন এল, খেয়াল করুন।",
+    "hint": "`customers` আর `districts` জোড়া লাগান: `ON d.id = c.district_id`।",
+    "solution": "SELECT c.name, d.name FROM customers c JOIN districts d ON d.id = c.district_id;",
+    "check": "rows"
+}

@@ -1,0 +1,18 @@
+<head>
+    <title>পেজ পাওয়া যায়নি · {{ data.site.name }}</title>
+    <meta name="robots" content="noindex">
+</head>
+
+<template>
+<div class="wrap">
+  <section class="page-head not-found">
+    <code class="nf-code">SELECT * FROM pages WHERE url = ?; -- ০টা row</code>
+    <h1>এই পেজ <span class="grad">মেলেনি</span></h1>
+    <p>যে ঠিকানা খুঁজছেন সেটা নেই, অথবা সরে গেছে।</p>
+    <div class="hero-actions">
+      <a class="cta" href="/">Playground-এ যান <span class="cta-arrow" aria-hidden="true">→</span></a>
+      <a class="cta ghost" href="/learn/">শেখা শুরু করুন</a>
+    </div>
+  </section>
+</div>
+</template>

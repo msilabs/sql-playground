@@ -1,0 +1,9 @@
+{
+    "title": "সবচেয়ে সস্তা ৩টা পণ্য",
+    "level": "সহজ",
+    "learn": "order-by",
+    "task": "এবার সবচেয়ে সস্তা ৩টা পণ্যের নাম আর দাম, ছোট থেকে বড়।",
+    "hint": "`ASC` মানে ছোট থেকে বড়; না লিখলেও ASC ধরা হয়।",
+    "solution": "SELECT name, price FROM products ORDER BY price ASC LIMIT 3;",
+    "check": "ordered"
+}

@@ -1,0 +1,9 @@
+{
+    "title": "সব গ্রাহক, জেলা থাক বা না থাক",
+    "level": "মাঝারি",
+    "learn": "left-join",
+    "task": "সব গ্রাহকের নাম আর জেলার নাম দেখুন। জেলা জানা না থাকলেও গ্রাহক যেন বাদ না পড়েন।",
+    "hint": "আগের query-তে `JOIN`-এর জায়গায় `LEFT JOIN`।",
+    "solution": "SELECT c.name, d.name FROM customers c LEFT JOIN districts d ON d.id = c.district_id;",
+    "check": "rows"
+}

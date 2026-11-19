@@ -1,0 +1,9 @@
+{
+    "title": "গড় দাম",
+    "level": "সহজ",
+    "learn": "avg",
+    "task": "সব পণ্যের গড় দাম কত?",
+    "hint": "গড়ের জন্য `avg(price)`।",
+    "solution": "SELECT avg(price) FROM products;",
+    "check": "rows"
+}

@@ -1,0 +1,9 @@
+{
+    "title": "শুধু নাম আর দাম",
+    "level": "সহজ",
+    "learn": "select",
+    "task": "এবার শুধু পণ্যের নাম (`name`) আর দাম (`price`) দেখুন।",
+    "hint": "`*`-এর জায়গায় column-এর নামগুলো কমা দিয়ে লিখুন।",
+    "solution": "SELECT name, price FROM products;",
+    "check": "rows"
+}

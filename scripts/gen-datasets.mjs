@@ -1,6 +1,8 @@
 import { writeFileSync } from "node:fs";
-// নমুনা ডেটা বানায়: node scripts/gen-datasets.mjs (seed ঠিক করা, তাই প্রতিবার হুবহু একই ডেটা)
-const outDir = new URL("../src/lib/db/datasets", import.meta.url).pathname;
+// নমুনা ডেটা বানায়: node scripts/gen-datasets.mjs (seed ঠিক করা, তাই প্রতিবার হুবহু একই ডেটা)।
+// ফল public/sql/datasets.js: worker importScripts দিয়ে পড়ে, টেস্টে Node require করে।
+const outFile = new URL("../public/sql/datasets.js", import.meta.url).pathname;
+const out = {};
 
 function rng(seed) {
   return () => {
@@ -15,9 +17,8 @@ const insert = (table, cols, rows) =>
   `INSERT INTO ${table} (${cols.join(", ")}) VALUES\n` + rows.map((r) => `  (${r.map(q).join(", ")})`).join(",\n") + ";";
 const pad = (n) => String(n).padStart(2, "0");
 
-function writeTs(name, constName, sql) {
-  if (sql.includes("`") || sql.includes("${")) throw new Error("bad char");
-  writeFileSync(`${outDir}/${name}.ts`, `// scripts/gen-datasets.mjs দিয়ে তৈরি নমুনা ডেটা। হাতে বদলালে mission-এর উত্তরও মিলিয়ে দেখুন (npm test)।\nexport const ${constName} = \`${sql}\n\`;\n`);
+function save(name, sql) {
+  out[name] = sql + "\n";
 }
 
 /* ---------- দোকান ---------- */
@@ -127,7 +128,7 @@ ${insert("products", ["id", "name", "category", "price", "stock"], products)}
 ${insert("orders", ["id", "customer_id", "order_date", "status", "payment"], orders)}
 
 ${insert("order_items", ["id", "order_id", "product_id", "quantity", "unit_price"], items)}`;
-  writeTs("dokan", "DOKAN_SQL", sql);
+  save("dokan", sql);
 }
 
 /* ---------- স্কুল ---------- */
@@ -208,5 +209,16 @@ ${insert("students", ["id", "name", "class_id", "roll", "gender", "birth_date", 
 ${insert("subjects", ["id", "name", "full_marks"], subjects)}
 
 ${insert("results", ["id", "student_id", "subject_id", "exam", "marks"], results)}`;
-  writeTs("school", "SCHOOL_SQL", sql);
+  save("school", sql);
 }
+
+writeFileSync(
+  outFile,
+  `// scripts/gen-datasets.mjs দিয়ে তৈরি নমুনা ডেটা, হাতে বদলাবেন না। বদলালে npm test চালিয়ে challenge আর পাঠের উত্তর মিলিয়ে দেখুন।
+(function (root) {
+  var api = ${JSON.stringify(out, null, 2)};
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.SqlDatasetSql = api;
+})(typeof self !== "undefined" ? self : this);
+`,
+);

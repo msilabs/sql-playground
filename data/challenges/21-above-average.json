@@ -1,0 +1,9 @@
+{
+    "title": "গড়ের চেয়ে দামি পণ্য",
+    "level": "মাঝারি",
+    "learn": "subquery",
+    "task": "গড় দামের চেয়ে দামি পণ্যগুলোর নাম আর দাম দেখুন।",
+    "hint": "`WHERE price > (SELECT avg(price) FROM products)`",
+    "solution": "SELECT name, price FROM products WHERE price > (SELECT avg(price) FROM products);",
+    "check": "rows"
+}
