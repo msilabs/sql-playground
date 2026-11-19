@@ -20,6 +20,7 @@ export const Session = require('../global/12-session.js');
 export const Storage = require('../global/13-storage.js');
 export const Share = require('../global/14-share.js');
 export const Challenge = require('../global/15-challenge.js');
+export const Trace = require('../global/16-trace.js');
 
 const runner = require('../public/sql/runner.js');
 const datasetSql = require('../public/sql/datasets.js');

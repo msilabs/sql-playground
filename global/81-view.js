@@ -27,32 +27,49 @@
     }
 
     // ফলের table: উপরের সারি আটকে থাকে, সংখ্যা ডানে, NULL আলাদা করে চেনা যায়।
-    // marks: WHERE/HAVING-এ কোন row টিকল; groups: GROUP BY-এ কোন row কোন দলে
+    // marks: WHERE/HAVING-এ কোন row টিকল; groups: GROUP BY-এ কোন row কোন দলে;
+    // states: index দিয়ে খোঁজার সময় প্রতিটা row-এর অবস্থা (skip, seek, keep, drop, stop, pending);
+    // pk: যে column-গুলো primary key, তাদের মাথায় PK চিহ্ন
     function table(opts) {
         var wrap = el('div', 'tbl-wrap');
         wrap.tabIndex = 0;
         if (opts.label) wrap.setAttribute('aria-label', opts.label);
         if (opts.maxHeight) wrap.style.maxHeight = opts.maxHeight;
-        var gutter = opts.marks !== undefined || opts.groups !== undefined;
+        var gutter = opts.marks !== undefined || opts.groups !== undefined || opts.states !== undefined;
+        var pk = opts.pk || [];
         var t = el('table', 'tbl');
         var head = el('tr');
         head.appendChild(el('th', 'rn', '#'));
         if (gutter) head.appendChild(el('th'));
-        opts.columns.forEach(function (c) { head.appendChild(el('th', '', c)); });
+        opts.columns.forEach(function (c) {
+            var th = el('th', '', c);
+            if (pk.indexOf(c) >= 0) {
+                var badge = el('span', 'badge pk', ui.pk);
+                badge.title = ui.pkTitle;
+                th.appendChild(badge);
+            }
+            head.appendChild(th);
+        });
         var thead = el('thead');
         thead.appendChild(head);
         t.appendChild(thead);
         var body = el('tbody');
         opts.rows.forEach(function (row, r) {
             var tr = el('tr');
-            var dropped = opts.marks !== undefined && !opts.marks[r];
+            var state = opts.states ? opts.states[r] : undefined;
+            var dropped = (opts.marks !== undefined && !opts.marks[r]) || state === 'drop';
+            if (state) tr.classList.add('st-' + state);
+            if (opts.cur === r) tr.classList.add('st-current');
             var group = opts.groups ? opts.groups[r] : undefined;
             if (dropped) tr.classList.add('dropped');
             if (group !== undefined) tr.className += ' group-row group-' + (group % 8);
             tr.appendChild(el('td', 'rn', bn(r + 1)));
             if (gutter) {
                 var mark = el('td', 'mark');
-                if (opts.marks !== undefined) {
+                if (state) {
+                    mark.className += ' ' + state;
+                    mark.textContent = (opts.cur === r ? '→ ' : '') + (ui.rowState[state] ?? '');
+                } else if (opts.marks !== undefined) {
                     mark.className += opts.marks[r] ? ' keep' : ' drop';
                     mark.textContent = opts.marks[r] ? '✓ ' + ui.kept : '✕ ' + ui.dropped;
                 } else mark.textContent = ui.group(group + 1);

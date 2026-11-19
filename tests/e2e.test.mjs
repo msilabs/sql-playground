@@ -117,6 +117,11 @@ test('e2e: Playground-এ query চলে, ফল, ব্যাখ্যা আ�
     await click('.pg-editor .btn.primary');
     await waitFor("document.querySelectorAll('.pg-result .tbl tbody tr').length > 0", 'result rows');
     assert.match(await text('.pg-result .explain'), /WHERE/);
+    // প্রথমে বাস্তবে যেভাবে চলে, পাশের ট্যাবে যুক্তির ক্রম
+    await waitFor("!!document.querySelector('.pg-insight .trace-viewer .trace-body tr.st-current')", 'trace');
+    assert.deepEqual(await js("[...document.querySelectorAll('.pg-insight .tabs button')].map((b) => b.textContent)"), ['বাস্তবে যেভাবে চলে', 'যুক্তির ক্রম', 'JOIN']);
+    assert.match(await js("[...document.querySelectorAll('.pg-insight .steps button')].map((b) => b.textContent).join(' ')"), /পড়া ও ছাঁকা/);
+    await js("document.querySelectorAll('.pg-insight .tabs button')[1].click()");
     await waitFor("document.querySelectorAll('.pg-insight .steps button').length === 4", 'stages');
     assert.deepEqual(await js("[...document.querySelectorAll('.pg-insight .steps button')].map((b) => b.textContent)"), ['১. FROM', '২. WHERE', '৩. SELECT', '৪. ORDER BY']);
     await type('.pg-editor', 'SELECT nam FROM products');
@@ -132,8 +137,9 @@ test('e2e: Playground-এ JOIN-এর ছবি, Undo, রিলোডের প
     await ready('.pg-editor .btn.primary');
     await type('.pg-editor', 'SELECT c.name, d.name FROM customers c LEFT JOIN districts d ON d.id = c.district_id');
     await click('.pg-editor .btn.primary');
-    await waitFor("[...document.querySelectorAll('.pg-insight .tabs button')].length === 2", 'insight tabs');
-    await js("document.querySelectorAll('.pg-insight .tabs button')[1].click()");
+    await waitFor("[...document.querySelectorAll('.pg-insight .tabs button')].length === 3", 'insight tabs');
+    await waitFor("/যুক্তির ক্রম/.test(document.querySelector('.pg-insight .insight-empty')?.textContent)", 'join has no trace yet');
+    await js("document.querySelectorAll('.pg-insight .tabs button')[2].click()");
     await waitFor("document.querySelectorAll('.pg-insight .jv path').length > 0", 'join lines');
 
     await type('.pg-editor', "DELETE FROM order_items WHERE id = 1");
@@ -155,7 +161,7 @@ test('e2e: শেয়ার লিংকের query editor-এ বসে, স
     assert.equal(await js('location.hash'), '');
 });
 
-test('e2e: পাঠের SQL বাক্স নিজে চলে, বদলে চালানো যায়, শুরু থেকে ফেরে', { skip }, async () => {
+test('e2e: পাঠের SQL বাক্স নিজে চলে, বদলে চালানো যায়, মূল query-তে ফেরে', { skip }, async () => {
     await open('learn/update/');
     await waitFor("document.querySelectorAll('#lessonBody .try').length >= 4 && [...document.querySelectorAll('#lessonBody .try')].every((t) => t.querySelector('.res-tabs, .tbl, .res-ok, .err'))", 'all boxes ran');
     assert.equal(await js("document.querySelector('.site-header .nav a.on').textContent.trim()"), 'Learn');
@@ -163,8 +169,29 @@ test('e2e: পাঠের SQL বাক্স নিজে চলে, বদল
     assert.equal(await js(`document.querySelectorAll('${box} .res-tabs button').length`), 2);
     // দ্বিতীয় বাক্সের "সব দাম ১০০" প্রথম বাক্সে পড়ে না
     assert.match(await js(`document.querySelector('${box} .tbl').textContent`), /40/);
-    await js(`(() => { const t = document.querySelector('${box} textarea'); t.value = "SELECT count(*) FROM products WHERE price = 100"; t.dispatchEvent(new Event('input')); document.querySelector('${box} .btn.primary').click(); })()`);
-    await waitFor(`document.querySelector('${box} .tbl td.num')?.textContent === '0'`, 'own db per box');
+    await js(`(() => { const t = document.querySelector('${box} textarea'); t.value = "SELECT count(*) FROM products WHERE price = 100"; t.dispatchEvent(new Event('input')); document.querySelector('${box} .steps-btn').click(); })()`);
+    // ধাপে ধাপে: প্রথমে বাস্তবে যেভাবে চলে (row ধরে ধরে), নিজে এগোয়, শেষ ধাপে পুরো ফল
+    await waitFor(`document.querySelector('${box} .analysis-tabs button.on')?.textContent === 'বাস্তবে যেভাবে চলে'`, 'trace shown');
+    assert.deepEqual(await js(`[...document.querySelectorAll('${box} .trace-viewer .steps button')].map((b) => b.textContent)`), ['১. পড়া ও ছাঁকা', '২. ফলে পাঠানো', '✓ ফল']);
+    assert.equal(await js(`document.querySelector('${box} details.sources').open`), false);
+    assert.match(await js(`document.querySelector('${box} details.sources summary').textContent`), /products/);
+    assert.equal(await js(`document.querySelectorAll('${box} .trace-body tr.st-current').length`), 1);
+    await waitFor(`/^ধাপ ২ /.test(document.querySelector('${box} .trace-viewer .step-nav span span').textContent)`, 'autoplay advances');
+    await js(`document.querySelector('${box} .trace-viewer .step-nav .btn.primary').click()`);
+    assert.match(await js(`document.querySelector('${box} .trace-viewer .step-nav span span').textContent`), /^ধাপ ৩ /);
+    assert.equal(await js(`document.querySelector('${box} .trace-viewer .step-play').textContent`), '▶ চালিয়ে যান');
+    await js(`document.querySelector('${box} .trace-viewer .steps li:last-child button').click()`);
+    assert.equal(await js(`document.querySelector('${box} .trace-body .explain') !== null`), true);
+    assert.equal(await js(`document.querySelector('${box} .trace-body .tbl td.num')?.textContent`), '0');
+    // পাশের ট্যাবে যুক্তির ক্রম
+    await js(`document.querySelectorAll('${box} .analysis-tabs button')[1].click()`);
+    assert.deepEqual(await js(`[...document.querySelectorAll('${box} .stage-viewer .steps button')].map((b) => b.textContent)`), ['১. FROM', '২. WHERE', '৩. SELECT', '✓ ফল']);
+    // সরাসরি রান: অল্প সময় loader, তারপর ধাপ ছাড়া শুধু ফল
+    await js(`document.querySelector('${box} .toolbar .btn.primary').click()`);
+    assert.equal(await js(`document.querySelector('${box} .try-loading').hidden`), false);
+    await waitFor(`document.querySelector('${box} .try-loading').hidden && !document.querySelector('${box} .toolbar .btn.primary').disabled`, 'instant run done');
+    assert.equal(await js(`document.querySelector('${box} .steps')`), null);
+    assert.equal(await js(`document.querySelector('${box} .tbl td.num')?.textContent`), '0');
     assert.match(await js(`document.querySelector('${box} .try-head a').getAttribute('href')`), /#d=dokan&q=/);
     assert.deepEqual(problems, []);
 });
