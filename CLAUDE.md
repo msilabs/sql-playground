@@ -13,7 +13,7 @@
 - `@msilabs/alo` আর `sql.js` ছাড়া কোনো npm package যোগ করা যাবে না।
 - SQLite চলে sql.js দিয়ে, `public/sql/engine.worker.js`-এ। `public/sql/sql-wasm.js` আর `sql-wasm.wasm` হাতে বদলানো যাবে না; `scripts/copy-wasm.mjs` node_modules থেকে কপি করে (dev, build আর test-এর আগে নিজে চলে, gitignore-এ আছে)।
 - `public/sql/runner.js` সাধারণ JS, কারণ worker আর টেস্ট দুজনেই এটা লোড করে।
-- Alo `global/*.js` নামের ক্রমে জোড়ে। `01`–`15` engine: DOM ছাড়া চলে, Node-এও `require` করা যায়। DOM-এর কাজ শুধু `8x-`/`9x-` ফাইলে, আর সেগুলো নিজের পেজের element না পেলে কিছু করে না। যে ফাইল load-এর সময় অন্য ফাইল পড়ে, তার নম্বর সেই ফাইলের পরে হতে হবে।
+- Alo `global/*.js` নামের ক্রমে জোড়ে। `01`–`16` engine: DOM ছাড়া চলে, Node-এও `require` করা যায়। DOM-এর কাজ শুধু `8x-`/`9x-` ফাইলে, আর সেগুলো নিজের পেজের element না পেলে কিছু করে না। যে ফাইল load-এর সময় অন্য ফাইল পড়ে, তার নম্বর সেই ফাইলের পরে হতে হবে।
 - CSS `global/style.css`-এ। JS-এ বানানো HTML-এ scoped `<style>` পৌঁছায় না।
 - UI-এর বাংলা লেখা `global/11-text.js`-এ। ব্যাখ্যা, ভুল আর ধাপের লেখা তাদের নিজের ফাইলে (`07-explain.js`, `08-errors.js`, `06-stages.js`)। বাংলায় সংখ্যা লিখতে `bn()`।
 - নমুনা ডেটা বদলাতে `scripts/gen-datasets.mjs` বদলে `node scripts/gen-datasets.mjs` চালান; `public/sql/datasets.js` হাতে বদলাবেন না।

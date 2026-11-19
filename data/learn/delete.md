@@ -31,7 +31,7 @@ DELETE FROM order_items;
 SELECT count(*) FROM order_items;
 ```
 
-এখানে **শুরু থেকে** চাপলে সব ফিরে আসে। আসল database-এ আসে না।
+এখানে **মূল query-তে ফিরুন** চাপলে সব ফিরে আসে। আসল database-এ আসে না।
 
 ## যে row-কে অন্য কেউ নির্দেশ করে
 

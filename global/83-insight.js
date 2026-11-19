@@ -1,4 +1,4 @@
-// DOM: "query কীভাবে চলে" প্যানেল। দুই ট্যাব: ধাপে ধাপে (চলার ক্রমে প্রতিটা ধাপের table)
+// DOM: "query কীভাবে চলে" প্যানেল। দুই ট্যাব: ধাপে ধাপে (যুক্তির ক্রমে প্রতিটা ধাপের table)
 // আর JOIN (দুই table পাশাপাশি, কোন row কোনটার সাথে মিলল তা লাইন টেনে)।
 (function () {
     if (typeof document === 'undefined') return;
@@ -18,26 +18,61 @@
         return row;
     }
 
-    function stageViewer(result) {
-        var root = el('div');
+    // SQL চলার আগে যে table-গুলো থেকে পড়া হবে, শুরুতে বন্ধ থাকে
+    function sourcesView(sources) {
+        var box = el('details', 'sources');
+        var summary = el('summary');
+        summary.appendChild(el('span', 'sources-label', ui.sourcesTitle));
+        sources.forEach(function (src) {
+            var chip = el('code', '', src.name);
+            chip.appendChild(el('small', '', ' · ' + ui.rowCount(src.total)));
+            summary.appendChild(chip);
+        });
+        box.appendChild(summary);
+        var inner = el('div', 'sources-body');
+        inner.appendChild(el('p', 'res-meta', ui.sourcesHint));
+        sources.forEach(function (src) {
+            var title = el('p', 'sources-name', src.name);
+            if (src.view) title.appendChild(el('span', 'badge', ui.viewBadge));
+            inner.appendChild(title);
+            inner.appendChild(V.table({ columns: src.columns, rows: src.rows, pk: src.pk, maxHeight: '16rem', label: src.name }));
+            if (src.rows.length < src.total) inner.appendChild(el('p', 'res-meta', ui.joinShown(src.rows.length, src.total)));
+        });
+        box.appendChild(inner);
+        return box;
+    }
+
+    // opts.autoplay: এত ms পরপর নিজে পরের ধাপে যায় (কেউ বোতাম চাপলে থামে)
+    // opts.final: { label, render(container) } শেষে একটা বাড়তি ধাপ, যেমন পুরো ফল
+    function stageViewer(result, opts) {
+        opts = opts || {};
+        var root = el('div', 'stage-viewer');
         if (!result.ok) {
             root.appendChild(el('p', 'insight-empty', result.message));
             return root;
         }
         var stages = result.stages;
+        var final = opts.final || null;
+        var total = stages.length + (final ? 1 : 0);
         var index = 0;
+        var timer = null;
+        if (!opts.noSources && result.sources && result.sources.length) root.appendChild(sourcesView(result.sources));
         var order = el('div', 'order-box');
         order.appendChild(orderRow(ui.writtenOrder, result.written, false));
-        order.appendChild(orderRow(ui.runOrder, stages.map(function (s) { return s.label; }), true));
+        var runLabels = stages.map(function (s) { return s.label; }).filter(function (l, i, all) { return l !== all[i - 1]; });
+        order.appendChild(orderRow(ui.runOrder, runLabels, true));
+        order.appendChild(el('p', 'order-note', ui.logicalNote));
         root.appendChild(order);
 
         var steps = el('ol', 'steps');
         steps.setAttribute('aria-label', ui.runOrder);
-        var buttons = stages.map(function (s, i) {
+        var labels = stages.map(function (s) { return { text: s.label + (s.sub ? ' · ' + s.sub : ''), bad: Boolean(s.error) }; });
+        if (final) labels.push({ text: final.label, bad: false });
+        var buttons = labels.map(function (s, i) {
             var li = el('li');
-            var b = el('button', s.error ? 'bad' : '', bn(i + 1) + '. ' + s.label);
+            var b = el('button', s.bad ? 'bad' : '', (final && i === stages.length ? '✓ ' : bn(i + 1) + '. ') + s.text);
             b.type = 'button';
-            b.addEventListener('click', function () { go(i); });
+            b.addEventListener('click', function () { stop(); go(i); });
             li.appendChild(b);
             steps.appendChild(li);
             return b;
@@ -51,28 +86,78 @@
         where.setAttribute('aria-live', 'polite');
         var next = el('button', 'btn small primary', ui.next);
         next.type = 'button';
-        prev.addEventListener('click', function () { go(index - 1); });
-        next.addEventListener('click', function () { go(index + 1); });
+        prev.addEventListener('click', function () { stop(); go(index - 1); });
+        next.addEventListener('click', function () { stop(); go(index + 1); });
         nav.appendChild(prev);
-        nav.appendChild(where);
+        var middle = el('span', 'step-mid');
+        middle.appendChild(where);
+        var playBtn = null;
+        if (opts.autoplay) {
+            playBtn = el('button', 'btn small step-play');
+            playBtn.type = 'button';
+            playBtn.addEventListener('click', function () {
+                if (timer) stop();
+                else play(index >= total - 1 ? 0 : index + 1);
+            });
+            middle.appendChild(playBtn);
+            root.style.setProperty('--step-ms', opts.autoplay + 'ms');
+        }
+        nav.appendChild(middle);
         nav.appendChild(next);
         root.appendChild(nav);
 
         var body = el('div');
         root.appendChild(body);
 
+        function renderPlay() {
+            if (!playBtn) return;
+            playBtn.textContent = timer ? ui.pauseSteps : index >= total - 1 ? ui.replaySteps : ui.playSteps;
+            buttons.forEach(function (b, j) { b.classList.toggle('playing', Boolean(timer) && j === index); });
+        }
+
+        function stop() {
+            clearTimeout(timer);
+            timer = null;
+            renderPlay();
+        }
+
+        function tick() {
+            timer = setTimeout(function () {
+                timer = null;
+                if (!root.isConnected) return renderPlay();
+                go(index + 1);
+                if (index < total - 1) tick();
+                renderPlay();
+            }, opts.autoplay);
+        }
+
+        function play(from) {
+            clearTimeout(timer);
+            go(from);
+            if (index < total - 1) tick();
+            renderPlay();
+        }
+
         function go(i) {
-            index = Math.max(0, Math.min(stages.length - 1, i));
-            var stage = stages[index];
+            index = Math.max(0, Math.min(total - 1, i));
             buttons.forEach(function (b, j) {
                 b.classList.toggle('on', j === index);
+                b.classList.toggle('past', j < index);
                 if (j === index) b.setAttribute('aria-current', 'step');
                 else b.removeAttribute('aria-current');
             });
             prev.disabled = index === 0;
-            next.disabled = index >= stages.length - 1;
-            where.textContent = ui.stepOf(index + 1, stages.length);
-            body.textContent = '';
+            next.disabled = index >= total - 1;
+            where.textContent = ui.stepOf(index + 1, total);
+            var fresh = el('div', 'stage-body');
+            body.replaceWith(fresh);
+            body = fresh;
+            renderPlay();
+            if (final && index === stages.length) {
+                final.render(body);
+                return;
+            }
+            var stage = stages[index];
             body.appendChild(el('p', 'stage-title', stage.title));
             body.appendChild(el('code', 'clause', stage.clause));
             body.appendChild(V.rich(el('p', 'stage-note'), stage.note));
@@ -82,10 +167,218 @@
                 body.appendChild(err);
                 return;
             }
-            body.appendChild(V.table({ columns: stage.columns, rows: stage.rows, marks: stage.marks, groups: stage.groups, maxHeight: '24rem', label: stage.label }));
+            body.appendChild(V.table({ columns: stage.columns, rows: stage.rows, marks: stage.marks, groups: stage.groups, states: stage.states, maxHeight: '24rem', label: stage.label }));
             if (stage.rows.length < stage.total) body.appendChild(el('p', 'res-meta', ui.shownRows(stage.rows.length)));
         }
-        if (stages.length) go(0);
+        if (total) {
+            if (opts.autoplay) play(0);
+            else go(0);
+        }
+        return root;
+    }
+
+    // বাস্তবে যেভাবে চলে: প্রতিটা frame-এ table (কোন row পড়ছে), জমার বাক্স আর এ পর্যন্ত ফল।
+    // opts: autoplay (ms), final ({ label, render }), sources
+    function traceViewer(trace, opts) {
+        opts = opts || {};
+        var root = el('div', 'trace-viewer');
+        if (opts.sources && opts.sources.length) root.appendChild(sourcesView(opts.sources));
+        var frames = trace.frames;
+        var final = opts.final || null;
+        var total = frames.length + (final ? 1 : 0);
+        var index = 0;
+        var timer = null;
+
+        var phases = trace.phases.slice();
+        if (final) phases.push('final');
+        var firstOf = {};
+        frames.forEach(function (f, i) { if (firstOf[f.phase] === undefined) firstOf[f.phase] = i; });
+        firstOf.final = frames.length;
+        var chips = el('ol', 'steps');
+        var chipButtons = phases.map(function (p, i) {
+            var li = el('li');
+            var name = p === 'read' && trace.tables.length > 1 ? ui.tracePhaseJoinRead : ui.tracePhase[p];
+            var b = el('button', '', p === 'final' ? '✓ ' + final.label : bn(i + 1) + '. ' + name);
+            b.type = 'button';
+            b.addEventListener('click', function () { stop(); go(firstOf[p]); });
+            li.appendChild(b);
+            chips.appendChild(li);
+            return b;
+        });
+        root.appendChild(chips);
+
+        var nav = el('div', 'step-nav');
+        var prev = el('button', 'btn small', ui.prev);
+        prev.type = 'button';
+        var next = el('button', 'btn small primary', ui.next);
+        next.type = 'button';
+        var where = el('span', '');
+        where.setAttribute('aria-live', 'polite');
+        var middle = el('span', 'step-mid');
+        middle.appendChild(where);
+        var playBtn = null;
+        if (opts.autoplay) {
+            playBtn = el('button', 'btn small step-play');
+            playBtn.type = 'button';
+            playBtn.addEventListener('click', function () {
+                if (timer) stop();
+                else play(index >= total - 1 ? 0 : index + 1);
+            });
+            middle.appendChild(playBtn);
+            root.style.setProperty('--step-ms', opts.autoplay + 'ms');
+        }
+        prev.addEventListener('click', function () { stop(); go(index - 1); });
+        next.addEventListener('click', function () { stop(); go(index + 1); });
+        nav.appendChild(prev);
+        nav.appendChild(middle);
+        nav.appendChild(next);
+        root.appendChild(nav);
+
+        var slider = el('input', 'trace-slider');
+        slider.type = 'range';
+        slider.min = '0';
+        slider.max = String(total - 1);
+        slider.setAttribute('aria-label', ui.traceSlider);
+        slider.addEventListener('input', function () { stop(); go(Number(slider.value)); });
+        root.appendChild(slider);
+
+        var body = el('div', 'trace-body');
+        root.appendChild(body);
+        root.appendChild(el('p', 'res-meta trace-foot', ui.traceBasis));
+
+        function renderPlay() {
+            if (!playBtn) return;
+            playBtn.textContent = timer ? ui.pauseSteps : index >= total - 1 ? ui.replaySteps : ui.playSteps;
+        }
+        function stop() {
+            clearTimeout(timer);
+            timer = null;
+            renderPlay();
+        }
+        function tick() {
+            timer = setTimeout(function () {
+                timer = null;
+                if (!root.isConnected) return renderPlay();
+                go(index + 1);
+                if (index < total - 1) tick();
+                renderPlay();
+            }, opts.autoplay);
+        }
+        function play(from) {
+            clearTimeout(timer);
+            go(from);
+            if (index < total - 1) tick();
+            renderPlay();
+        }
+
+        function section(title, node) {
+            var sec = el('div', 'trace-sec');
+            sec.appendChild(el('p', 'trace-sec-title', title));
+            sec.appendChild(node);
+            return sec;
+        }
+
+        function go(i) {
+            index = Math.max(0, Math.min(total - 1, i));
+            var phase = index >= frames.length ? 'final' : frames[index].phase;
+            var at = phases.indexOf(phase);
+            chipButtons.forEach(function (b, j) {
+                b.classList.toggle('on', j === at);
+                b.classList.toggle('past', j < at);
+            });
+            prev.disabled = index === 0;
+            next.disabled = index >= total - 1;
+            slider.value = String(index);
+            where.textContent = ui.stepOf(index + 1, total);
+            renderPlay();
+            body.textContent = '';
+            if (final && index === frames.length) {
+                final.render(body);
+                return;
+            }
+            var f = frames[index];
+            body.appendChild(V.rich(el('p', 'trace-note'), f.note));
+            if (f.acc) {
+                var acc = el('div', 'trace-acc');
+                acc.appendChild(el('span', '', ui.traceAcc));
+                f.acc.forEach(function (a) { acc.appendChild(el('code', '', a)); });
+                body.appendChild(acc);
+            }
+            var grid = el('div', 'trace-grid');
+            var srcTables = trace.tables.map(function (t, k) {
+                var tbl = V.table({ columns: t.columns, rows: t.rows, states: f.src[k], cur: f.cur[k], pk: t.pk, maxHeight: t.role === 'only' ? '17rem' : '14rem', label: t.name });
+                var title = t.role === 'outer' ? ui.traceOuter(t.name, t.alias) : t.role === 'inner' ? ui.traceInner(t.name, t.alias) : ui.traceTable(t.name);
+                grid.appendChild(section(title, tbl));
+                return tbl;
+            });
+            if (f.box) {
+                grid.appendChild(section(ui.traceBox(f.box.rows.length), f.box.rows.length
+                    ? V.table({ columns: f.box.columns, rows: f.box.rows, states: f.box.states, maxHeight: '14rem', label: ui.traceBox(f.box.rows.length) })
+                    : el('p', 'res-empty', ui.traceBoxEmpty)));
+            }
+            grid.appendChild(section(ui.traceOut(f.outCount), f.outCount
+                ? V.table({ columns: trace.outColumns, rows: trace.outRows.slice(0, f.outCount), maxHeight: '14rem', label: ui.resultTitle })
+                : el('p', 'res-empty', ui.traceOutEmpty)));
+            body.appendChild(grid);
+            // চলতি row-টা table-এর মাঝখানে আনা (পেজ নিজে scroll না করে)
+            srcTables.forEach(function (tbl) {
+                var row = tbl.querySelector('tr.st-current');
+                if (row) tbl.scrollTop = row.offsetTop - tbl.clientHeight / 2;
+            });
+        }
+
+        if (total) {
+            if (opts.autoplay) play(0);
+            else go(0);
+        }
+        return root;
+    }
+
+    // "বাস্তবে যেভাবে চলে" আর "যুক্তির ক্রম" দুই ট্যাব, উপরে query-র table-গুলো।
+    // data: { stages, trace }; opts: autoplay, traceAutoplay, final
+    function analysisView(data, opts) {
+        opts = opts || {};
+        var root = el('div', 'analysis');
+        var sources = data.stages && data.stages.sources;
+        if (sources && sources.length) root.appendChild(sourcesView(sources));
+        var tabs = el('div', 'tabs analysis-tabs');
+        tabs.setAttribute('role', 'tablist');
+        var body = el('div');
+        body.setAttribute('role', 'tabpanel');
+        root.appendChild(tabs);
+        root.appendChild(body);
+        var views = {};
+        var first = true;
+        var buttons = {};
+        var traceOk = data.trace && data.trace.ok;
+
+        function build(tab) {
+            var auto = first;
+            first = false;
+            if (tab === 'real') {
+                if (!traceOk) return el('p', 'insight-empty', ui.traceUnavailable(data.trace ? data.trace.message : ''));
+                return traceViewer(data.trace, { autoplay: auto ? opts.traceAutoplay : 0, final: opts.final });
+            }
+            return stageViewer(data.stages, { autoplay: auto ? opts.autoplay : 0, final: opts.final, noSources: true });
+        }
+        function show(tab) {
+            if (!views[tab]) views[tab] = build(tab);
+            Object.keys(buttons).forEach(function (k) {
+                buttons[k].classList.toggle('on', k === tab);
+                buttons[k].setAttribute('aria-selected', String(k === tab));
+            });
+            body.textContent = '';
+            body.appendChild(views[tab]);
+        }
+        [['real', ui.realTab], ['logical', ui.logicalTab]].forEach(function (t) {
+            var b = el('button', '', t[1]);
+            b.type = 'button';
+            b.setAttribute('role', 'tab');
+            b.addEventListener('click', function () { show(t[0]); });
+            buttons[t[0]] = b;
+            tabs.appendChild(b);
+        });
+        show(traceOk ? 'real' : 'logical');
         return root;
     }
 
@@ -227,9 +520,9 @@
         var tabs = el('div', 'tabs');
         tabs.setAttribute('role', 'tablist');
         tabs.setAttribute('aria-label', ui.insightTitle);
-        var tab = 'stages';
+        var tab = 'real';
         var tabButtons = {};
-        [['stages', ui.stagesTab], ['join', ui.joinTab]].forEach(function (t) {
+        [['real', ui.realTab], ['stages', ui.logicalTab], ['join', ui.joinTab]].forEach(function (t) {
             var b = el('button', '', t[1]);
             b.type = 'button';
             b.setAttribute('role', 'tab');
@@ -256,6 +549,10 @@
             body.textContent = '';
             if (state.status === 'idle') body.appendChild(el('p', 'insight-empty', ui.insightEmpty));
             else if (state.status === 'loading') body.appendChild(el('p', 'loading', ui.insightLoading));
+            else if (tab === 'real') {
+                if (state.trace && state.trace.ok) body.appendChild(traceViewer(state.trace, { sources: state.stages.sources }));
+                else body.appendChild(el('p', 'insight-empty', ui.traceUnavailable(state.trace ? state.trace.message : '')));
+            }
             else if (tab === 'stages') body.appendChild(stageViewer(state.stages));
             else if (state.join) body.appendChild(joinViewer(state.join));
             else body.appendChild(el('p', 'insight-empty', state.hasJoin ? ui.joinUnavailable : ui.noJoin));
@@ -269,5 +566,5 @@
         };
     }
 
-    window.SqlInsight = { mount: mount };
+    window.SqlInsight = { mount: mount, stageViewer: stageViewer, traceViewer: traceViewer, analysisView: analysisView };
 })();

@@ -64,7 +64,7 @@
                 return {
                     summary: `${table ? `${code(table)} table-এর` : "table-এর"} ${bn(changes)}টা row বদলানো হলো।`,
                     steps: [],
-                    warning: noWhere && changes > 1 ? "WHERE নেই, তাই table-এর সব row বদলে গেছে। ভুল হলে Undo বা শুরু থেকে চাপুন।" : undefined,
+                    warning: noWhere && changes > 1 ? "WHERE নেই, তাই table-এর সব row বদলে গেছে। ভুল হলে Playground-এ Undo, পাঠের বাক্সে “মূল query-তে ফিরুন” চাপুন।" : undefined,
                 };
             }
             case "delete": {
@@ -73,7 +73,7 @@
                 return {
                     summary: `${table ? `${code(table)} table থেকে` : "table থেকে"} ${bn(changes)}টা row মুছে ফেলা হলো।`,
                     steps: [],
-                    warning: noWhere && changes > 1 ? "WHERE নেই, তাই table-এর সব row মুছে গেছে। ভুল হলে Undo বা শুরু থেকে চাপুন।" : undefined,
+                    warning: noWhere && changes > 1 ? "WHERE নেই, তাই table-এর সব row মুছে গেছে। ভুল হলে Playground-এ Undo, পাঠের বাক্সে “মূল query-তে ফিরুন” চাপুন।" : undefined,
                 };
             }
             case "create": {
@@ -144,7 +144,7 @@
             else {
                 const first = significant(tokenize(q.from))[0];
                 steps.push(first && isNameToken(first)
-                    ? `FROM: ${code(identName(first))} table থেকে row আনা হলো।`
+                    ? `FROM: ${code(identName(first))} table থেকে row পড়া হলো।`
                     : "FROM: subquery-র ফলকে table হিসেবে নেওয়া হলো।");
             }
         }

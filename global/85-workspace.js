@@ -1,5 +1,5 @@
 // query চালানোর সাধারণ অংশ, Playground, Challenge আর পাঠের বাক্স সবাই এটা ব্যবহার করে:
-// চালানো, ভুলের বাংলা বার্তা, ব্যাখ্যা, আর SELECT হলে ধাপ ও JOIN-এর ছবি।
+// চালানো, ভুলের বাংলা বার্তা, ব্যাখ্যা, আর SELECT হলে বাস্তবে যেভাবে চলে, যুক্তির ধাপ ও JOIN-এর ছবি।
 (function () {
     if (typeof document === 'undefined') return;
     var Db = window.SqlDb;
@@ -7,6 +7,7 @@
     var Errors = window.SqlErrors;
     var explainStatement = window.SqlExplain.explainStatement;
     var Stages = window.SqlStages;
+    var Trace = window.SqlTrace;
     var Join = window.SqlJoin;
     var splitSelect = window.SqlSplit.splitSelect;
     var mutationsOf = window.SqlSession.mutationsOf;
@@ -54,11 +55,12 @@
         var last = result.statements[result.statements.length - 1];
         if (result.error || !last) return null;
         var stages = await Stages.runStages(engine, last.sql);
-        if (T.statementKind(last.sql) !== 'select') return { stages: stages, join: null, hasJoin: false };
+        var trace = await Trace.runTrace(engine, last.sql);
+        if (T.statementKind(last.sql) !== 'select') return { stages: stages, trace: trace, join: null, hasJoin: false };
         var split = splitSelect(last.sql);
         var hasJoin = split.ok && split.query.from !== undefined && Join.parseJoin(split.query.from) !== null;
         var join = hasJoin ? await Join.buildJoinView(engine, last.sql) : null;
-        return { stages: stages, join: join, hasJoin: hasJoin };
+        return { stages: stages, trace: trace, join: join, hasJoin: hasJoin };
     }
 
     window.SqlWorkspace = { execute: execute, analyze: analyze, lastWithRows: lastWithRows };
