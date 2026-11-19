@@ -21,7 +21,6 @@
                 </section>
                 <section class="card pg-result" aria-label="ফল"></section>
             </div>
-            <section class="card pg-insight" aria-label="query কীভাবে চলে"></section>
             <aside class="card pg-schema" aria-label="Table"></aside>
         </div>
     </main>

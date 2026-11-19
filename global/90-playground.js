@@ -1,5 +1,7 @@
-// DOM: Playground (home পেজ)। editor, ফল, "কীভাবে চলে" আর table-এর তালিকা জোড়া দেয়,
-// আর session browser-এ সেভ রাখে। শেয়ার লিংকে (#d=…&q=…) query এলে editor-এ বসায়।
+// DOM: Playground (home পেজ)। editor, ফল আর table-এর তালিকা জোড়া দেয়, আর session browser-এ সেভ রাখে।
+// পাঠের বাক্সের মতোই দুই বোতাম: "রান করুন" সরাসরি ফল দেখায়; "ধাপে ধাপে" ফলের কার্ডে দেখায় SQLite
+// বাস্তবে কী করে (পাশের ট্যাবে যুক্তির ক্রম আর JOIN), নিজে এগোয়, শেষ ধাপে পুরো ফল।
+// শেয়ার লিংকে (#d=…&q=…) query এলে editor-এ বসায়।
 (function () {
     if (typeof document === 'undefined') return;
     var root = document.getElementById('playground');
@@ -19,6 +21,11 @@
     var schema = Db.EMPTY_SCHEMA;
     var status = 'loading';
     var runId = 0;
+    var nextSteps = false;
+    var STEP_MS = 2200;
+    var TRACE_MS = 1300;
+    var MIN_LOADER_MS = 400;
+    var wait = function (ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); };
 
     var saved = Storage.loadSession();
     if (saved.status === 'corrupt') Storage.clearSession();
@@ -33,9 +40,12 @@
     var editorCard = root.querySelector('.pg-editor');
     editorCard.textContent = '';
     var bar = el('div', 'toolbar');
-    var runBtn = el('button', 'btn primary', '▶ ' + ui.run);
+    var runBtn = el('button', 'btn primary', '▶ ' + ui.tryRun);
     runBtn.type = 'button';
+    var stepsBtn = el('button', 'btn steps-btn', '▶ ' + ui.tryRunSteps);
+    stepsBtn.type = 'button';
     bar.appendChild(runBtn);
+    bar.appendChild(stepsBtn);
     bar.appendChild(el('span', 'spacer'));
     var historySelect = el('select');
     historySelect.setAttribute('aria-label', ui.history);
@@ -59,7 +69,11 @@
             update(function (s) { return Object.assign({}, s, { editor: text }); });
             renderSchema();
         },
-        onRun: run
+        onRun: function (text) {
+            var steps = nextSteps;
+            nextSteps = false;
+            return run(text, steps ? 'steps' : 'run');
+        }
     });
     var foot = el('div', 'ed-foot');
     foot.appendChild(historySelect);
@@ -75,14 +89,24 @@
     editorCard.appendChild(notice);
     editorCard.appendChild(saveWarn);
 
-    var results = V.resultPanel(root.querySelector('.pg-result'));
-    var insight = window.SqlInsight.mount(root.querySelector('.pg-insight'));
+    // ফলের কার্ড: ধাপ দেখালে ফলটা শেষ ধাপের ভেতরে চলে যায়
+    var resultCard = root.querySelector('.pg-result');
+    var stepSlot = el('div', 'pg-steps');
+    stepSlot.hidden = true;
+    resultCard.appendChild(stepSlot);
+    var resultSlot = el('div');
+    resultCard.appendChild(resultSlot);
+    var loader = el('p', 'try-loading', ui.running);
+    loader.setAttribute('role', 'status');
+    loader.hidden = true;
+    resultCard.appendChild(loader);
+    var results = V.resultPanel(resultSlot);
     var schemaView = window.SqlSchemaView.mount(root.querySelector('.pg-schema'), {
         onInsert: function (text) { editor.insert(text); },
         onView: function (table) {
             var sql = 'SELECT * FROM ' + (/^[a-z_][a-z0-9_]*$/i.test(table) ? table : '"' + table + '"') + ' LIMIT 50;';
             setEditor(sql);
-            run(sql);
+            run(sql, 'run');
         },
         onDataset: function (id) {
             if (id === session.dataset) return;
@@ -126,7 +150,7 @@
         var log = S.currentLog(session);
         var lastChange = log[log.length - 1];
         runBtn.disabled = busy;
-        runBtn.textContent = '▶ ' + (status === 'running' ? ui.running : ui.run);
+        stepsBtn.disabled = busy;
         undoBtn.disabled = busy || !lastChange;
         undoBtn.title = lastChange ? ui.undoTitle(lastChange) : ui.undoNone;
         resetBtn.disabled = busy;
@@ -154,50 +178,83 @@
         }
     }
 
-    async function run(text) {
+    function showLoader(on) {
+        loader.hidden = !on;
+        results.busy(on);
+        if (on) {
+            stepSlot.hidden = true;
+            resultSlot.hidden = true;
+        } else resultSlot.hidden = false;
+    }
+
+    function showPlain() {
+        stepSlot.textContent = '';
+        stepSlot.hidden = true;
+        resultCard.insertBefore(resultSlot, loader);
+    }
+
+    function showSteps(data) {
+        stepSlot.textContent = '';
+        stepSlot.hidden = false;
+        resultSlot.remove();
+        stepSlot.appendChild(window.SqlInsight.analysisView(data, {
+            autoplay: STEP_MS,
+            traceAutoplay: TRACE_MS,
+            final: { label: ui.finalStep, render: function (container) { container.appendChild(resultSlot); } }
+        }));
+    }
+
+    // mode: 'run' (সরাসরি ফল) বা 'steps' (ধাপে ধাপে)
+    async function run(text, mode) {
         if (status !== 'ready' || !text.trim()) return;
         var id = ++runId;
+        var started = Date.now();
         setStatus('running');
         say('');
-        results.busy(true);
+        showPlain();
+        showLoader(true);
         var done = await W.execute(engine, text, schema);
-        results.busy(false);
         results.show(done.output);
         if (!done.ok) {
-            insight.idle();
+            await wait(MIN_LOADER_MS - (Date.now() - started));
+            showLoader(false);
+            showPlain();
             await loadDb();
             return;
         }
         update(function (s) { return S.applyRun(s, text, done.result); });
         schema = done.schema;
-        setStatus('ready');
-        if (done.result.error) {
-            insight.idle();
-            return;
-        }
-        insight.loading();
-        try {
-            var data = await W.analyze(engine, done.result);
-            if (runId === id) {
-                if (data) insight.show(data);
-                else insight.idle();
+        var data = null;
+        if (mode === 'steps' && !done.result.error) {
+            try {
+                data = await W.analyze(engine, done.result);
+            } catch (e) {
+                if (e instanceof Db.TimeoutError) await loadDb();
             }
-        } catch (e) {
-            if (runId === id) insight.idle();
-            if (e instanceof Db.TimeoutError) await loadDb();
         }
+        await wait(MIN_LOADER_MS - (Date.now() - started));
+        if (runId !== id) return;
+        if (status === 'running') setStatus('ready');
+        showLoader(false);
+        var drawable = data && ((data.trace && data.trace.ok) || (data.stages.ok && data.stages.stages.length));
+        if (drawable) showSteps(data);
+        else showPlain();
     }
 
     async function rebuild(next, message) {
         runId++;
+        showPlain();
         results.clear();
-        insight.idle();
         await loadDb();
         say(message);
     }
 
     // ---- বোতাম
     runBtn.addEventListener('click', function () { editor.run(); });
+    stepsBtn.addEventListener('click', function () {
+        nextSteps = true;
+        editor.run();
+    });
     historySelect.addEventListener('change', function () {
         if (historySelect.value) setEditor(historySelect.value);
         historySelect.value = '';
