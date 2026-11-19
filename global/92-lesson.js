@@ -146,6 +146,7 @@
             if (running || !text.trim()) return;
             var user = mode !== 'start';
             var started = Date.now();
+            showPlain();
             busy(true, user);
             var stages = null;
             var failed = false;

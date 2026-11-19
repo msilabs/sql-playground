@@ -12,7 +12,7 @@
 
 ## তিনটা অংশ
 
-- **Playground** (home): খোলা editor, ফল, "query কীভাবে চলে" আর table-এর তালিকা। যা খুশি চালান, বদলগুলো browser-এ সেভ থাকে।
+- **Playground** (home): খোলা editor, ফল আর table-এর তালিকা। "রান করুন" সরাসরি ফল দেখায়, "ধাপে ধাপে রান করুন" দেখায় query কীভাবে চলে। যা খুশি চালান, বদলগুলো browser-এ সেভ থাকে।
 - **Learn:** ৩৫টা পাঠ, প্রতিটা একটা বিষয় নিয়ে: SELECT, DISTINCT, WHERE, অপারেটর, AND/OR/NOT, ORDER BY, LIMIT, NULL, LIKE, IN, BETWEEN, AS, INSERT, UPDATE, DELETE, INSERT … SELECT, COUNT, SUM, AVG, MIN/MAX, GROUP BY, HAVING, JOIN-এর সব রকম (INNER, LEFT, RIGHT, FULL, self), UNION, subquery, EXISTS, CASE, IFNULL/COALESCE আর comment। প্রতিটা পাঠ নিজে নিজে সম্পূর্ণ, তাই যেটা লাগে সেটা সরাসরি খোলা যায়। প্রতিটায় আসল ডেটার ওপর চালানো-যায় এমন SQL বাক্স; প্রতিটা বাক্সের নিজের DB, তাই এক বাক্সের UPDATE আরেকটায় পড়ে না।
 - **Challenge:** ২৮টা, সহজ থেকে কঠিন। কী বের করতে হবে বলা থাকে, query নিজে লিখতে হয়। যাচাই হয় ফল মিলিয়ে, তাই যেকোনো সঠিক query চলে। প্রতিটা challenge নিজের নতুন DB-তে চলে, সাথে ইঙ্গিত, উত্তর আর সংশ্লিষ্ট পাঠের লিংক। একটা শেষ হলে পরেরটা খোলে।
 
@@ -21,7 +21,8 @@
 - **আসল SQLite:** JOIN (RIGHT আর FULL-সহ), subquery, CTE, window ফাংশন, INSERT/UPDATE/DELETE, CREATE TABLE, সব চলে। একসাথে কয়েকটা statement দিলে প্রতিটার ফল আলাদা দেখায়।
 - **বাংলায় ব্যাখ্যা:** প্রতিটা query-র পরে ধাপে ধাপে কী হলো। WHERE ছাড়া UPDATE বা DELETE দিলে সতর্কবার্তা।
 - **বাংলায় ভুল আর ইঙ্গিত:** `no such column: custmer_id` এলে বলে দেয় "আপনি কি `customer_id` বোঝাতে চেয়েছেন?"। আসল ইংরেজি বার্তাও দেখা যায়।
-- **ধাপে ধাপে:** প্রতিটা clause-এর পরের table। WHERE-এ কোন row টিকল আর কোনটা বাদ গেল, GROUP BY-তে কোন row কোন দলে (রঙে), HAVING-এ কোন দল টিকল।
+- **বাস্তবে যেভাবে চলে:** "ধাপে ধাপে রান করুন" চাপলে দেখা যায় SQLite row ধরে ধরে কী করে: কোন row পড়ল, শর্ত মিলল কি না, ফলে গেল নাকি জমার বাক্সে, LIMIT-এ কোথায় থামল, primary key দিয়ে কোথায় লাফ দিল। JOIN-এ লুপের ভেতরে লুপ: বাইরের প্রতিটা row-এর জন্য ভেতরের table-এ কীভাবে জোড়া খোঁজে (primary key, অস্থায়ী index বা সব row দেখে)। নিজে নিজে এগোয়, আগে-পরে যাওয়া যায়, শেষে পুরো ফল। এখনো এক বা দুই table-এর query পর্যন্ত।
+- **যুক্তির ক্রম:** পাশের ট্যাবে প্রতিটা clause-এর পরের table (FROM → WHERE → GROUP BY → …)। WHERE-এ কোন row টিকল আর কোনটা বাদ গেল, GROUP BY-তে কোন row কোন দলে (রঙে), HAVING-এ কোন দল টিকল।
 - **JOIN-এর ছবি:** দুই table পাশাপাশি, মিলে যাওয়া row-গুলো লাইনে জোড়া। LEFT JOIN-এ কোথায় NULL বসল তা আলাদা রঙে।
 - **বাংলাদেশি ডেটা:** "অনলাইন দোকান" (জেলা, গ্রাহক, পণ্য, অর্ডার, bKash/Nagad পেমেন্ট) আর "স্কুল" (শ্রেণি, শিক্ষার্থী, বিষয়, নম্বর)।
 - **নিরাপদে ভুল করা:** Undo দিয়ে শেষ বদল বাতিল, রিসেট দিয়ে শুরুর অবস্থা। শেষ না হওয়া query ৩ সেকেন্ডে থেমে যায়, পেজ আটকায় না।
@@ -48,15 +49,16 @@ GitHub Pages-এর মতো sub-path-এর জন্য: `npm run build -- --
 public/sql/engine.worker.js   Web Worker: sql.js লোড করে, query চালায়
 public/sql/runner.js          statement ভাগ করে চালানো (worker আর টেস্ট দুজনেই ব্যবহার করে)
 public/sql/datasets.js        নমুনা ডেটা (scripts/gen-datasets.mjs বানায়)
-global/01-15                  engine, DOM ছাড়া চলে:
+global/01-16                  engine, DOM ছাড়া চলে:
   02-tokenize.js                ছোট SQL tokenizer: highlight, autocomplete, statement ভাগ
   03-split.js                   SELECT-কে clause-এ ভাগ করা
-  06-stages.js                  ধাপে ধাপে: প্রতিটা ধাপের জন্য ছোট query বানিয়ে আসল SQLite-এ চালানো
+  06-stages.js                  যুক্তির ক্রম: প্রতিটা ধাপের জন্য ছোট query বানিয়ে আসল SQLite-এ চালানো
+  16-trace.js                   বাস্তবে যেভাবে চলে: SQLite-এর plan আর আসল ডেটা থেকে row ধরে ধরে ঘটনা
   05-join.js                    JOIN-এর rowid জোড়া
   07-explain.js, 08-errors.js   বাংলা ব্যাখ্যা আর ভুলের বার্তা
   12-session.js                 অবস্থা: dataset + DB বদলানো statement-এর তালিকা
   15-challenge.js               challenge-এর উত্তর যাচাই
-global/80-92                  DOM: worker client, editor, ফল, ধাপ/JOIN-এর ছবি, Playground, Challenge, পাঠের বাক্স
+global/80-92                  DOM: worker client, editor, ফল, ধাপে ধাপে আর JOIN-এর ছবি, Playground, Challenge, পাঠের বাক্স
 pages/                        Playground, Learn, পাঠ আর Challenge পেজ
 data/learn/*.md               পাঠ
 data/challenges/*.json        challenge
@@ -65,6 +67,7 @@ data/challenges/*.json        challenge
 কয়েকটা সিদ্ধান্ত:
 
 - **visualizer নিজে SQL হিসাব করে না।** প্রতিটা ধাপের জন্য মূল query-র টুকরো জুড়ে একটা ছোট SELECT বানিয়ে আসল SQLite-এ চালায়। WHERE-এর শর্ত একটা বাড়তি column হিসেবে হিসাব হয় (`CASE WHEN … THEN 1 ELSE 0 END`), তাই কোন row টিকল আর কোনটা বাদ গেল দুটোই দেখানো যায়। UNION বা WINDOW clause থাকলে ধাপ দেখায় না, তবে ফল ঠিকই আসে।
+- **"বাস্তবে যেভাবে চলে" আন্দাজে লেখা নয়।** sql.js ভেতরের প্রতিটা পদক্ষেপ রেকর্ড করতে দেয় না, তাই ঘটনাগুলো সাজানো হয় SQLite-এর নিজের `EXPLAIN QUERY PLAN` আর bytecode (কোন table বাইরে, কোন index, কোথায় temp B-tree) আর আসল ডেটা থেকে। টেস্টে প্রতিটা query-র শেষ ফল আসল SQLite-এর ফলের সাথে হুবহু মেলানো হয়। plan চেনা না গেলে বাস্তবের ছবি না দেখিয়ে যুক্তির ক্রম দেখায়।
 - **পুরো DB সেভ হয় না।** সেভ হয় dataset-এর নাম আর DB বদলানো statement-গুলো। রিলোডে সেগুলো আবার চালালে একই DB ফিরে আসে। undo মানে শেষটা বাদ দিয়ে আবার চালানো। পাঠের বাক্স আর challenge-ও একই কৌশলে নিজের নিজের DB রাখে।
 - **worker-এ SQLite।** WASM-এর ভেতরের লুপ থামানোর উপায় নেই, তাই সময় পেরোলে worker-টাই বন্ধ করে নতুন একটা চালু হয়, আর আগের বদলগুলো আবার চালানো হয়।
 

@@ -1,5 +1,5 @@
-// DOM: "query কীভাবে চলে" প্যানেল। দুই ট্যাব: ধাপে ধাপে (যুক্তির ক্রমে প্রতিটা ধাপের table)
-// আর JOIN (দুই table পাশাপাশি, কোন row কোনটার সাথে মিলল তা লাইন টেনে)।
+// DOM: query কীভাবে চলে। ট্যাব: বাস্তবে যেভাবে চলে (row ধরে ধরে), যুক্তির ক্রম (প্রতিটা ধাপের table)
+// আর JOIN (দুই table পাশাপাশি, কোন row কোনটার সাথে মিলল তা লাইন টেনে)। পাঠের বাক্স আর Playground দুজনেই ব্যবহার করে।
 (function () {
     if (typeof document === 'undefined') return;
     var bn = window.SqlBn.bn;
@@ -334,8 +334,8 @@
         return root;
     }
 
-    // "বাস্তবে যেভাবে চলে" আর "যুক্তির ক্রম" দুই ট্যাব, উপরে query-র table-গুলো।
-    // data: { stages, trace }; opts: autoplay, traceAutoplay, final
+    // "বাস্তবে যেভাবে চলে", "যুক্তির ক্রম" আর (JOIN থাকলে) "JOIN" ট্যাব, উপরে query-র table-গুলো।
+    // data: { stages, trace, join, hasJoin }; opts: autoplay, traceAutoplay, final
     function analysisView(data, opts) {
         opts = opts || {};
         var root = el('div', 'analysis');
@@ -359,6 +359,7 @@
                 if (!traceOk) return el('p', 'insight-empty', ui.traceUnavailable(data.trace ? data.trace.message : ''));
                 return traceViewer(data.trace, { autoplay: auto ? opts.traceAutoplay : 0, final: opts.final });
             }
+            if (tab === 'join') return data.join ? joinViewer(data.join) : el('p', 'insight-empty', ui.joinUnavailable);
             return stageViewer(data.stages, { autoplay: auto ? opts.autoplay : 0, final: opts.final, noSources: true });
         }
         function show(tab) {
@@ -370,7 +371,9 @@
             body.textContent = '';
             body.appendChild(views[tab]);
         }
-        [['real', ui.realTab], ['logical', ui.logicalTab]].forEach(function (t) {
+        var list = [['real', ui.realTab], ['logical', ui.logicalTab]];
+        if (data.hasJoin) list.push(['join', ui.joinTab]);
+        list.forEach(function (t) {
             var b = el('button', '', t[1]);
             b.type = 'button';
             b.setAttribute('role', 'tab');
@@ -514,57 +517,5 @@
         return root;
     }
 
-    function mount(container) {
-        var head = el('div', 'card-head');
-        head.appendChild(el('h2', 'card-title', ui.insightTitle));
-        var tabs = el('div', 'tabs');
-        tabs.setAttribute('role', 'tablist');
-        tabs.setAttribute('aria-label', ui.insightTitle);
-        var tab = 'real';
-        var tabButtons = {};
-        [['real', ui.realTab], ['stages', ui.logicalTab], ['join', ui.joinTab]].forEach(function (t) {
-            var b = el('button', '', t[1]);
-            b.type = 'button';
-            b.setAttribute('role', 'tab');
-            b.addEventListener('click', function () {
-                tab = t[0];
-                render();
-            });
-            tabButtons[t[0]] = b;
-            tabs.appendChild(b);
-        });
-        head.appendChild(tabs);
-        var body = el('div');
-        body.setAttribute('role', 'tabpanel');
-        container.appendChild(head);
-        container.appendChild(body);
-
-        var state = { status: 'idle' };
-
-        function render() {
-            Object.keys(tabButtons).forEach(function (k) {
-                tabButtons[k].classList.toggle('on', k === tab);
-                tabButtons[k].setAttribute('aria-selected', String(k === tab));
-            });
-            body.textContent = '';
-            if (state.status === 'idle') body.appendChild(el('p', 'insight-empty', ui.insightEmpty));
-            else if (state.status === 'loading') body.appendChild(el('p', 'loading', ui.insightLoading));
-            else if (tab === 'real') {
-                if (state.trace && state.trace.ok) body.appendChild(traceViewer(state.trace, { sources: state.stages.sources }));
-                else body.appendChild(el('p', 'insight-empty', ui.traceUnavailable(state.trace ? state.trace.message : '')));
-            }
-            else if (tab === 'stages') body.appendChild(stageViewer(state.stages));
-            else if (state.join) body.appendChild(joinViewer(state.join));
-            else body.appendChild(el('p', 'insight-empty', state.hasJoin ? ui.joinUnavailable : ui.noJoin));
-        }
-
-        render();
-        return {
-            idle: function () { state = { status: 'idle' }; render(); },
-            loading: function () { state = { status: 'loading' }; render(); },
-            show: function (data) { state = Object.assign({ status: 'ready' }, data); render(); }
-        };
-    }
-
-    window.SqlInsight = { mount: mount, stageViewer: stageViewer, traceViewer: traceViewer, analysisView: analysisView };
+    window.SqlInsight = { stageViewer: stageViewer, traceViewer: traceViewer, analysisView: analysisView };
 })();

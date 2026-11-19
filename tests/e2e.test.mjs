@@ -114,19 +114,29 @@ test('e2e: header-এ তিনটা লিংক, hero থেকে Learn আ�
 test('e2e: Playground-এ query চলে, ফল, ব্যাখ্যা আর ধাপ আসে, ভুলের বাংলা বার্তা আসে', { skip }, async () => {
     await open();
     await ready('.pg-editor .btn.primary');
+    assert.deepEqual(await js("[...document.querySelectorAll('.pg-editor .toolbar .btn')].slice(0, 2).map((b) => b.textContent)"), ['▶ রান করুন', '▶ ধাপে ধাপে রান করুন']);
+    // সরাসরি রান: loader, তারপর শুধু ফল আর ব্যাখ্যা
     await click('.pg-editor .btn.primary');
+    assert.equal(await js("document.querySelector('.pg-result .try-loading').hidden"), false);
     await waitFor("document.querySelectorAll('.pg-result .tbl tbody tr').length > 0", 'result rows');
     assert.match(await text('.pg-result .explain'), /WHERE/);
-    // প্রথমে বাস্তবে যেভাবে চলে, পাশের ট্যাবে যুক্তির ক্রম
-    await waitFor("!!document.querySelector('.pg-insight .trace-viewer .trace-body tr.st-current')", 'trace');
-    assert.deepEqual(await js("[...document.querySelectorAll('.pg-insight .tabs button')].map((b) => b.textContent)"), ['বাস্তবে যেভাবে চলে', 'যুক্তির ক্রম', 'JOIN']);
-    assert.match(await js("[...document.querySelectorAll('.pg-insight .steps button')].map((b) => b.textContent).join(' ')"), /পড়া ও ছাঁকা/);
-    await js("document.querySelectorAll('.pg-insight .tabs button')[1].click()");
-    await waitFor("document.querySelectorAll('.pg-insight .steps button').length === 4", 'stages');
-    assert.deepEqual(await js("[...document.querySelectorAll('.pg-insight .steps button')].map((b) => b.textContent)"), ['১. FROM', '২. WHERE', '৩. SELECT', '৪. ORDER BY']);
+    assert.equal(await js("document.querySelector('.pg-result .analysis')"), null);
+    await ready('.pg-editor .steps-btn');
+    // ধাপে ধাপে: প্রথমে বাস্তবে যেভাবে চলে, নিজে এগোয়, পাশের ট্যাবে যুক্তির ক্রম, শেষ ধাপে পুরো ফল
+    await click('.pg-editor .steps-btn');
+    await waitFor("!!document.querySelector('.pg-result .trace-viewer .trace-body tr.st-current')", 'trace');
+    assert.deepEqual(await js("[...document.querySelectorAll('.pg-result .analysis-tabs button')].map((b) => b.textContent)"), ['বাস্তবে যেভাবে চলে', 'যুক্তির ক্রম']);
+    assert.match(await js("[...document.querySelectorAll('.pg-result .trace-viewer .steps button')].map((b) => b.textContent).join(' ')"), /পড়া ও ছাঁকা/);
+    await waitFor("/^ধাপ ২ /.test(document.querySelector('.pg-result .trace-viewer .step-nav span span').textContent)", 'autoplay advances');
+    await js("document.querySelectorAll('.pg-result .analysis-tabs button')[1].click()");
+    assert.deepEqual(await js("[...document.querySelectorAll('.pg-result .stage-viewer .steps button')].map((b) => b.textContent)"), ['১. FROM', '২. WHERE', '৩. SELECT', '৪. ORDER BY', '✓ ফল']);
+    await js("document.querySelector('.pg-result .stage-viewer .steps li:last-child button').click()");
+    assert.match(await text('.pg-result .stage-viewer .explain'), /WHERE/);
+    await ready('.pg-editor .btn.primary');
     await type('.pg-editor', 'SELECT nam FROM products');
     await click('.pg-editor .btn.primary');
     await waitFor("!!document.querySelector('.pg-result .err')", 'error box');
+    assert.equal(await js("document.querySelector('.pg-result .analysis')"), null);
     assert.match(await text('.pg-result .err-title'), /column নেই/);
     assert.match(await text('.pg-result .err-hint'), /name/);
     assert.deepEqual(problems, []);
@@ -136,12 +146,13 @@ test('e2e: Playground-এ JOIN-এর ছবি, Undo, রিলোডের প
     await open();
     await ready('.pg-editor .btn.primary');
     await type('.pg-editor', 'SELECT c.name, d.name FROM customers c LEFT JOIN districts d ON d.id = c.district_id');
-    await click('.pg-editor .btn.primary');
-    await waitFor("[...document.querySelectorAll('.pg-insight .tabs button')].length === 3", 'insight tabs');
-    await waitFor("document.querySelectorAll('.pg-insight .trace-sec-title').length >= 3", 'join trace');
-    assert.match(await js("[...document.querySelectorAll('.pg-insight .trace-sec-title')].map((e) => e.textContent).join(' | ')"), /বাইরের লুপ: customers.*ভেতরের লুপ: districts/);
-    await js("document.querySelectorAll('.pg-insight .tabs button')[2].click()");
-    await waitFor("document.querySelectorAll('.pg-insight .jv path').length > 0", 'join lines');
+    await click('.pg-editor .steps-btn');
+    await waitFor("[...document.querySelectorAll('.pg-result .analysis-tabs button')].length === 3", 'analysis tabs');
+    await waitFor("document.querySelectorAll('.pg-result .trace-sec-title').length >= 3", 'join trace');
+    assert.match(await js("[...document.querySelectorAll('.pg-result .trace-sec-title')].map((e) => e.textContent).join(' | ')"), /বাইরের লুপ: customers.*ভেতরের লুপ: districts/);
+    await js("document.querySelectorAll('.pg-result .analysis-tabs button')[2].click()");
+    await waitFor("document.querySelectorAll('.pg-result .jv path').length > 0", 'join lines');
+    await ready('.pg-editor .btn.primary');
 
     await type('.pg-editor', "DELETE FROM order_items WHERE id = 1");
     await click('.pg-editor .btn.primary');
