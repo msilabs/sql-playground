@@ -1,0 +1,8 @@
+{
+    "name": "SQL Playground",
+    "tagline": "বাংলায় SQL শেখার জায়গা",
+    "description": "ব্রাউজারেই আসল SQLite দিয়ে SQL শিখুন, কোনো install বা লগইন ছাড়া। প্রতিটা query-র বাংলা ব্যাখ্যা, ধাপে ধাপে কীভাবে চলে তার ছবি, SELECT থেকে JOIN পর্যন্ত আলাদা আলাদা পাঠ আর challenge।",
+    "lang": "bn",
+    "url": "https://msilabs.github.io",
+    "repo": "https://github.com/msilabs/sql-playground"
+}

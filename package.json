@@ -1,58 +1,42 @@
 {
-  "name": "sql-playground",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Learn SQL in the browser: real SQLite, Bengali explanations and a step-by-step query visualizer.",
-  "license": "MIT",
-  "author": "msilabs",
-  "homepage": "https://msilabs.github.io/sql-playground/",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/msilabs/sql-playground.git"
-  },
-  "bugs": {
-    "url": "https://github.com/msilabs/sql-playground/issues"
-  },
-  "keywords": [
-    "sql",
-    "sqlite",
-    "learning",
-    "playground",
-    "bengali",
-    "bangla",
-    "education"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
-  "scripts": {
-    "predev": "node scripts/copy-wasm.mjs",
-    "dev": "next dev",
-    "prebuild": "node scripts/copy-wasm.mjs",
-    "build": "next build",
-    "start": "node scripts/serve.mjs",
-    "lint": "eslint",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "og": "node scripts/og-image.mjs"
-  },
-  "dependencies": {
-    "next": "^16.4.6",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "sql.js": "1.15.2"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.63.0",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.4.2",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.1.12"
-  }
+    "name": "sql-playground",
+    "private": true,
+    "description": "ব্রাউজারে আসল SQLite দিয়ে SQL শিখুন: বাংলা ব্যাখ্যা, ধাপে ধাপে query, আলাদা আলাদা পাঠ আর challenge",
+    "license": "MIT",
+    "author": "msilabs",
+    "homepage": "https://msilabs.github.io/sql-playground/",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/msilabs/sql-playground.git"
+    },
+    "bugs": {
+        "url": "https://github.com/msilabs/sql-playground/issues"
+    },
+    "keywords": [
+        "sql",
+        "sqlite",
+        "learning",
+        "playground",
+        "bengali",
+        "bangla",
+        "education"
+    ],
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "predev": "node scripts/copy-wasm.mjs",
+        "dev": "alo dev",
+        "prebuild": "node scripts/copy-wasm.mjs",
+        "build": "alo build",
+        "pretest": "node scripts/copy-wasm.mjs",
+        "test": "node --test tests/*.test.mjs",
+        "og": "node scripts/og-image.mjs"
+    },
+    "dependencies": {
+        "sql.js": "1.15.2"
+    },
+    "devDependencies": {
+        "@msilabs/alo": "^1.2.2"
+    }
 }

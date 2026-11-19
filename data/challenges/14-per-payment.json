@@ -1,0 +1,9 @@
+{
+    "title": "কোন পদ্ধতিতে কয়টা অর্ডার",
+    "level": "মাঝারি",
+    "learn": "group-by",
+    "task": "কোন পরিশোধ পদ্ধতিতে (`payment`) কয়টা অর্ডার হয়েছে? পদ্ধতি আর সংখ্যা, বেশি থেকে কম সাজিয়ে।",
+    "hint": "GROUP BY payment, তারপর `ORDER BY count(*) DESC`।",
+    "solution": "SELECT payment, count(*) FROM orders GROUP BY payment ORDER BY count(*) DESC;",
+    "check": "rows"
+}

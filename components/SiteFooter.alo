@@ -1,0 +1,121 @@
+<template>
+    <footer class="site-footer">
+        <div class="inner">
+            <p class="made">
+                <svg class="alo" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><defs><radialGradient id="alo-g" cx="0.5" cy="0.45" r="0.6"><stop offset="0" stop-color="#ffe29a"/><stop offset="0.55" stop-color="#f5a524"/><stop offset="1" stop-color="#d97706"/></radialGradient></defs><circle cx="16" cy="16" r="15" fill="url(#alo-g)"/><path d="M16 6.5C17 10.2 21.6 12.8 21.6 18.4a5.6 5.6 0 0 1-11.2 0c0-3 1.7-4.9 2.9-6.4.3 1.9 1 3 1.9 3.5-.4-3.1-.1-6.2.8-9Z" fill="#fff"/></svg>
+                <template if="data.site.lang === 'bn'">
+                    <span><a href="https://github.com/msilabs/alo" target="_blank" rel="noopener">আলো</a> দিয়ে বানানো</span>
+                </template>
+                <template else>
+                    <span>Built with <a href="https://github.com/msilabs/alo" target="_blank" rel="noopener">Alo</a></span>
+                </template>
+                <span class="sep" aria-hidden="true">·</span>
+                <a href="https://github.com/msilabs" target="_blank" rel="noopener">msilabs</a>
+            </p>
+            <nav class="links" aria-label="{{ data.site.lang === 'bn' ? 'ফুটার লিংক' : 'Footer links' }}">
+                <a href="{{ data.site.repo }}" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {{ data.site.lang === 'bn' ? 'সোর্স কোড' : 'Source code' }}
+                </a>
+                <a href="{{ data.site.repo }}/issues" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5v5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.3" fill="currentColor"/></svg>
+                    {{ data.site.lang === 'bn' ? 'সমস্যা জানান' : 'Report an issue' }}
+                </a>
+                <a href="{{ data.site.repo }}/fork" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="6.5" cy="5.5" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="5.5" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="19" r="2.3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 7.8v1.2a2.5 2.5 0 0 0 2.5 2.5h6a2.5 2.5 0 0 0 2.5-2.5V7.8M12 11.5v5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    {{ data.site.lang === 'bn' ? 'ফর্ক করুন' : 'Fork' }}
+                </a>
+            </nav>
+        </div>
+    </footer>
+</template>
+
+<style>
+    .site-footer {
+        margin-top: var(--footer-gap, 48px);
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 24px;
+        max-width: var(--page-max, 1180px);
+        margin: 0 auto;
+        padding-block: 22px calc(22px + env(safe-area-inset-bottom, 0px));
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    .made {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+    }
+
+    .alo {
+        flex: none;
+    }
+
+    .sep {
+        opacity: 0.5;
+    }
+
+    a {
+        color: var(--ink);
+        font-weight: 600;
+        text-decoration: none;
+        text-underline-offset: 3px;
+    }
+
+    a:hover {
+        color: var(--accent);
+        text-decoration: underline;
+    }
+
+    a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+    }
+
+    .links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-weight: 500;
+    }
+
+    .links a:hover {
+        text-decoration: none;
+    }
+
+    .links svg {
+        flex: none;
+    }
+
+    @media (max-width: 640px) {
+        .inner {
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .links {
+            justify-content: center;
+            gap: 8px 16px;
+        }
+    }
+</style>

@@ -1,0 +1,9 @@
+{
+    "title": "সবচেয়ে দামি ৫টা পণ্য",
+    "level": "সহজ",
+    "learn": "limit",
+    "task": "সবচেয়ে দামি ৫টা পণ্যের নাম আর দাম দেখুন, বড় থেকে ছোট।",
+    "hint": "`ORDER BY price DESC` দিয়ে সাজিয়ে `LIMIT 5`।",
+    "solution": "SELECT name, price FROM products ORDER BY price DESC LIMIT 5;",
+    "check": "ordered"
+}

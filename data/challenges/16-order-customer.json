@@ -1,0 +1,9 @@
+{
+    "title": "অর্ডারের পাশে গ্রাহকের নাম",
+    "level": "মাঝারি",
+    "learn": "inner-join",
+    "task": "প্রতিটা অর্ডারের id-এর পাশে গ্রাহকের নাম দেখুন।",
+    "hint": "`FROM orders o JOIN customers c ON c.id = o.customer_id`, তারপর `SELECT o.id, c.name`।",
+    "solution": "SELECT o.id, c.name FROM orders o JOIN customers c ON c.id = o.customer_id;",
+    "check": "rows"
+}

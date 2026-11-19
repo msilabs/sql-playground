@@ -1,0 +1,9 @@
+{
+    "title": "একই ফোন নম্বর একাধিক গ্রাহকের",
+    "level": "কঠিন",
+    "learn": "having",
+    "task": "একই ফোন নম্বর একাধিক গ্রাহকের নামে আছে। সেই নম্বর আর কতজনের নামে, তা দেখুন।",
+    "hint": "`GROUP BY phone`, তারপর `HAVING count(*) > 1`।",
+    "solution": "SELECT phone, count(*) FROM customers GROUP BY phone HAVING count(*) > 1;",
+    "check": "rows"
+}

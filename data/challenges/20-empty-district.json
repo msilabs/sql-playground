@@ -1,0 +1,9 @@
+{
+    "title": "গ্রাহক নেই এমন জেলা",
+    "level": "কঠিন",
+    "learn": "left-join",
+    "task": "কোন জেলা থেকে একজন গ্রাহকও নেই? জেলার নাম দেখুন।",
+    "hint": "এবার বাঁয়ে `districts`, ডানে `customers`।",
+    "solution": "SELECT d.name FROM districts d LEFT JOIN customers c ON c.district_id = d.id WHERE c.id IS NULL;",
+    "check": "rows"
+}

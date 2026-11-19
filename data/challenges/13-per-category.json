@@ -1,0 +1,9 @@
+{
+    "title": "প্রতি category-তে কয়টা পণ্য",
+    "level": "মাঝারি",
+    "learn": "group-by",
+    "task": "প্রতিটা `category`-তে কয়টা পণ্য আছে? category আর সংখ্যা দেখুন।",
+    "hint": "`SELECT category, count(*) FROM products GROUP BY category`",
+    "solution": "SELECT category, count(*) FROM products GROUP BY category;",
+    "check": "rows"
+}

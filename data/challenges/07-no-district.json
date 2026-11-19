@@ -1,0 +1,9 @@
+{
+    "title": "জেলা জানা নেই",
+    "level": "সহজ",
+    "learn": "null",
+    "task": "একজন গ্রাহকের জেলা জানা নেই (`district_id` ফাঁকা)। তার নাম বের করুন।",
+    "hint": "NULL-এর সাথে `=` কখনো সত্য হয় না। লিখতে হয় `IS NULL`।",
+    "solution": "SELECT name FROM customers WHERE district_id IS NULL;",
+    "check": "rows"
+}

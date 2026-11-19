@@ -1,0 +1,10 @@
+{
+    "title": "বাতিল অর্ডারের পণ্য মুছুন",
+    "level": "মাঝারি",
+    "learn": "delete",
+    "task": "বাতিল (`cancelled`) হওয়া অর্ডারগুলোর সব পণ্য `order_items` থেকে মুছে ফেলুন।",
+    "hint": "`DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE status = 'cancelled')`",
+    "solution": "DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE status = 'cancelled');",
+    "check": "state",
+    "verify": "SELECT (SELECT count(*) FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE status = 'cancelled')) = 0 AND (SELECT count(*) FROM order_items) > 0"
+}

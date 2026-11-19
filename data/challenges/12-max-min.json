@@ -1,0 +1,9 @@
+{
+    "title": "সবচেয়ে বেশি আর কম দাম",
+    "level": "সহজ",
+    "learn": "min-max",
+    "task": "সবচেয়ে বেশি আর সবচেয়ে কম দাম একসাথে দেখুন (প্রথমে বেশি, তারপর কম)।",
+    "hint": "এক SELECT-এ দুটো: `max(price), min(price)`।",
+    "solution": "SELECT max(price), min(price) FROM products;",
+    "check": "rows"
+}

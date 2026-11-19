@@ -1,0 +1,13 @@
+{
+    "title": "গামছার দাম বাড়ান",
+    "level": "সহজ",
+    "learn": "update",
+    "task": "দোকানে নতুন পণ্য 'গামছা' যোগ হয়েছে, দাম 200। এর দাম বাড়িয়ে 220 করুন। শুধু গামছার, অন্য কোনো পণ্যের নয়!",
+    "hint": "`UPDATE products SET price = 220 WHERE name = 'গামছা'`। WHERE ভুললে সব পণ্যের দাম 220 হয়ে যাবে।",
+    "solution": "UPDATE products SET price = 220 WHERE name = 'গামছা';",
+    "check": "state",
+    "verify": "SELECT (SELECT count(*) FROM products WHERE name = 'গামছা' AND price = 220) > 0 AND (SELECT count(*) FROM products WHERE price = 220) = 1",
+    "setup": [
+        "INSERT INTO products (name, category, price, stock) VALUES ('গামছা', 'পোশাক', 200, 50);"
+    ]
+}

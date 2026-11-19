@@ -1,0 +1,9 @@
+{
+    "title": "bkash বা nagad-এ পরিশোধ",
+    "level": "মাঝারি",
+    "learn": "in",
+    "task": "যেসব অর্ডারের টাকা দেওয়া হয়েছে (`status` হলো `paid`) আর পরিশোধ হয়েছে `bkash` বা `nagad`-এ, সেগুলোর সব column দেখুন।",
+    "hint": "দুই শর্ত জুড়তে `AND`। কয়েকটা মানের যেকোনোটা বোঝাতে `payment IN ('bkash', 'nagad')`।",
+    "solution": "SELECT * FROM orders WHERE status = 'paid' AND payment IN ('bkash', 'nagad');",
+    "check": "rows"
+}

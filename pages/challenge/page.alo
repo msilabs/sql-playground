@@ -1,0 +1,53 @@
+<head>
+    <title>Challenge · {{ data.site.name }}</title>
+    <meta name="description" content="SQL-এর {{ data.challenges.length.toLocaleString('bn-BD') }}টা challenge, সহজ থেকে কঠিন। প্রথম SELECT থেকে তিন table-এর JOIN পর্যন্ত, নিজে query লিখে সমাধান করুন। ফল মিলিয়ে নিজে থেকে যাচাই হয়।">
+    <meta property="og:title" content="Challenge · {{ data.site.name }}">
+    <meta property="og:description" content="SQL-এর {{ data.challenges.length.toLocaleString('bn-BD') }}টা challenge, সহজ থেকে কঠিন। প্রথম SELECT থেকে তিন table-এর JOIN পর্যন্ত, নিজে query লিখে সমাধান করুন। ফল মিলিয়ে নিজে থেকে যাচাই হয়।">
+</head>
+
+<template>
+<main class="wrap" id="challengeApp" data-json="{{ JSON.stringify(data.challenges.map((c) => ({ id: c.slug.replace(/^\d+-/, ''), title: c.title, level: c.level, learn: c.learn, learnTitle: (data.learn.find((l) => l.slug === c.learn) || {}).title, task: c.task, hint: c.hint, solution: c.solution, check: c.check, verify: c.verify, setup: c.setup }))) }}">
+  <section class="page-head">
+    <h1>নিজে লিখে <span class="grad">যাচাই করুন</span></h1>
+    <p>{{ data.challenges.length.toLocaleString('bn-BD') }}টা challenge, সহজ থেকে কঠিন। কী বের করতে হবে বলা আছে, query নিজে লিখবেন। যাচাই হয় ফল মিলিয়ে, তাই যেকোনো সঠিক query চলে। একটা শেষ হলে পরেরটা খোলে, অগ্রগতি শুধু আপনার browser-এ থাকে।</p>
+  </section>
+
+  <div class="side-layout">
+    <aside class="card side-list ch-aside">
+      <div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+      <p class="progress-text" id="progressText"></p>
+      <div id="chList"></div>
+      <button type="button" class="reset-link" id="chReset">অগ্রগতি মুছুন</button>
+    </aside>
+
+    <section class="ch-main">
+      <div class="card ch-panel">
+        <div class="ch-title">
+          <span class="ch-no" id="chNo"></span>
+          <h2 id="chTitle"></h2>
+          <span class="lvl" id="chLevel"></span>
+        </div>
+        <p class="ch-task" id="chTask"></p>
+        <div class="ch-feedback" id="chFeedback" aria-live="polite" hidden></div>
+        <div class="ch-buttons">
+          <button type="button" class="btn small" id="chHint">ইঙ্গিত</button>
+          <button type="button" class="btn small" id="chSolution">উত্তর দেখুন</button>
+          <a class="ch-learn" id="chLearn" hidden></a>
+          <span class="spacer"></span>
+          <button type="button" class="btn small primary" id="chNext" hidden>পরের challenge →</button>
+        </div>
+        <div class="hint-box" id="chHintBox" hidden></div>
+        <div class="solution" id="chSolutionBox" hidden></div>
+      </div>
+
+      <div class="ch-work">
+        <div class="ch-left">
+          <section class="card" id="chEditor" aria-label="SQL লিখুন"></section>
+          <section class="card" id="chResult" aria-label="ফল"></section>
+        </div>
+        <aside class="card ch-schema" id="chSchema" aria-label="Table"></aside>
+      </div>
+    </section>
+  </div>
+</main>
+</template>

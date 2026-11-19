@@ -1,0 +1,9 @@
+{
+    "title": "৩টার বেশি অর্ডার দেওয়া গ্রাহক",
+    "level": "মাঝারি",
+    "learn": "having",
+    "task": "যেসব গ্রাহক ৩টার বেশি অর্ডার দিয়েছেন, তাদের `customer_id` আর অর্ডারের সংখ্যা দেখুন।",
+    "hint": "দলের ওপর শর্ত WHERE-এ চলে না, লাগে `HAVING count(*) > 3`।",
+    "solution": "SELECT customer_id, count(*) FROM orders GROUP BY customer_id HAVING count(*) > 3;",
+    "check": "rows"
+}

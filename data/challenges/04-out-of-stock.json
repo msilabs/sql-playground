@@ -1,0 +1,9 @@
+{
+    "title": "স্টকে নেই এমন পণ্য",
+    "level": "সহজ",
+    "learn": "where",
+    "task": "যেসব পণ্য স্টকে নেই (`stock` শূন্য), সেগুলোর শুধু নাম দেখুন।",
+    "hint": "সমান বোঝাতে SQL-এ একটা `=` লেখা হয়।",
+    "solution": "SELECT name FROM products WHERE stock = 0;",
+    "check": "rows"
+}

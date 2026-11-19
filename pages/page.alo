@@ -1,0 +1,28 @@
+<template>
+    <main class="wrap">
+        <section class="hero-home">
+            <h1>SQL,<br> <span class="nb">এবার <span class="grad">বাংলায়</span></span></h1>
+            <div class="hero-side">
+                <p>ব্রাউজারেই চলে আসল SQLite, কিছু install করতে হয় না। query লিখে চালান, প্রতিটার বাংলা ব্যাখ্যা পান, আর দেখুন SQLite ধাপে ধাপে কীভাবে উত্তর বানায়। ভুল করলে Undo আছে।</p>
+                <div class="hero-actions">
+                    <a class="cta ghost" href="/learn/">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 6.5c2.8-1.4 5.8-1.4 9 .5 3.2-1.9 6.2-1.9 9-.5V18c-2.8-1.4-5.8-1.4-9 .5-3.2-1.9-6.2-1.9-9-.5z M12 7v11.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+                        শেখা শুরু করুন
+                    </a>
+                    <a class="cta" href="/challenge/">Challenge দিন <span class="cta-arrow" aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <div class="pg" id="playground">
+            <div class="pg-main">
+                <section class="card pg-editor" aria-label="SQL লিখুন">
+                    <noscript><p class="notice">এই playground চালাতে JavaScript লাগে।</p></noscript>
+                </section>
+                <section class="card pg-result" aria-label="ফল"></section>
+            </div>
+            <section class="card pg-insight" aria-label="query কীভাবে চলে"></section>
+            <aside class="card pg-schema" aria-label="Table"></aside>
+        </div>
+    </main>
+</template>

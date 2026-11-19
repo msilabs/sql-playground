@@ -1,0 +1,9 @@
+{
+    "title": "সব পণ্যের সব তথ্য",
+    "level": "সহজ",
+    "learn": "select",
+    "task": "`products` table-এর সব পণ্যের সব তথ্য দেখুন।",
+    "hint": "সব column বোঝাতে `*` লিখুন: `SELECT * FROM …`",
+    "solution": "SELECT * FROM products;",
+    "check": "rows"
+}

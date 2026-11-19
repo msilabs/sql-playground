@@ -1,0 +1,9 @@
+{
+    "title": "নামের শেষে ইসলাম",
+    "level": "সহজ",
+    "learn": "like",
+    "task": "যেসব গ্রাহকের নাম 'ইসলাম' দিয়ে শেষ, তাদের নাম দেখুন।",
+    "hint": "`LIKE '%ইসলাম'`: `%` মানে যেকোনো কিছু, যত অক্ষরই হোক।",
+    "solution": "SELECT name FROM customers WHERE name LIKE '%ইসলাম';",
+    "check": "rows"
+}

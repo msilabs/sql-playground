@@ -1,0 +1,39 @@
+<head>
+    <title>Learn · {{ data.site.name }}</title>
+    <meta name="description" content="SQL বাংলায় শিখুন: SELECT, WHERE, GROUP BY, JOIN, UPDATE, DELETE সহ {{ data.learn.length.toLocaleString('bn-BD') }}টা আলাদা পাঠ। যেটা লাগে সেটা সরাসরি খুলুন, প্রতিটায় নিজে চালিয়ে দেখার SQL বাক্স।">
+    <meta property="og:title" content="Learn · {{ data.site.name }}">
+    <meta property="og:description" content="SQL বাংলায় শিখুন: SELECT, WHERE, GROUP BY, JOIN, UPDATE, DELETE সহ {{ data.learn.length.toLocaleString('bn-BD') }}টা আলাদা পাঠ। যেটা লাগে সেটা সরাসরি খুলুন, প্রতিটায় নিজে চালিয়ে দেখার SQL বাক্স।">
+</head>
+
+<template>
+<main class="wrap">
+  <section class="page-head">
+    <h1>SQL <span class="grad">শুরু থেকে শিখুন</span></h1>
+    <p>{{ data.learn.length.toLocaleString('bn-BD') }}টা পাঠ, প্রতিটা একটা বিষয় নিয়ে। ক্রমে পড়তে পারেন, আবার যেটা দরকার সেটা সরাসরি খুলতেও পারেন। প্রতিটা পাঠে আসল ডেটার ওপর query বদলে চালিয়ে দেখার বাক্স আছে।</p>
+    <a class="cta" href="/learn/{{ data.learn.find((l) => l.order === 1).slug }}/">প্রথম পাঠ শুরু করুন <span class="cta-arrow" aria-hidden="true">→</span></a>
+  </section>
+
+  <template for="stage in [{ name: 'শুরু', note: 'table থেকে পড়া, ছাঁকা আর সাজানো', from: 1, to: 8 }, { name: 'ছাঁকার আরও উপায়', note: 'NULL, খোঁজা, তালিকা, সীমা আর নতুন নাম', from: 9, to: 13 }, { name: 'ডেটা বদলানো', note: 'যোগ করা, বদলানো আর মোছা', from: 14, to: 17 }, { name: 'হিসাব আর দল', note: 'গোনা, যোগফল, গড় আর দলে ভাগ', from: 18, to: 23 }, { name: 'table জোড়া', note: 'JOIN-এর সব রকম আর UNION', from: 24, to: 30 }, { name: 'আরও গভীরে', note: 'subquery, শর্ত আর NULL সামলানো', from: 31, to: 99 }]">
+    <section class="stage">
+      <div class="stage-head">
+        <h2 class="section-title">{{ stage.name }}</h2>
+        <span class="stage-note">{{ stage.note }}</span>
+      </div>
+      <ol class="course">
+        <template for="l in data.learn.filter((x) => x.order >= stage.from && x.order <= stage.to).toSorted((a, b) => a.order - b.order)">
+          <li>
+            <a class="card course-item" href="/learn/{{ l.slug }}/">
+              <span class="num">{{ l.order.toLocaleString('bn-BD') }}</span>
+              <span class="txt">
+                <b>{{ l.title }}</b>
+                <span>{{ l.summary }}</span>
+              </span>
+              <svg class="go" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </li>
+        </template>
+      </ol>
+    </section>
+  </template>
+</main>
+</template>

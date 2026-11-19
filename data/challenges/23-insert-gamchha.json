@@ -1,0 +1,10 @@
+{
+    "title": "নতুন পণ্য যোগ: গামছা",
+    "level": "সহজ",
+    "learn": "insert",
+    "task": "নতুন পণ্য যোগ করুন: নাম 'গামছা', category 'পোশাক', দাম 200, stock 50।",
+    "hint": "`INSERT INTO products (name, category, price, stock) VALUES (…)`। id না দিলে SQLite নিজেই দেয়।",
+    "solution": "INSERT INTO products (name, category, price, stock) VALUES ('গামছা', 'পোশাক', 200, 50);",
+    "check": "state",
+    "verify": "SELECT count(*) > 0 FROM products WHERE name = 'গামছা' AND price = 200"
+}

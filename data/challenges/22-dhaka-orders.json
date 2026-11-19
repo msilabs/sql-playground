@@ -1,0 +1,9 @@
+{
+    "title": "ঢাকার গ্রাহকদের অর্ডার",
+    "level": "মাঝারি",
+    "learn": "subquery",
+    "task": "ঢাকা জেলার (`district_id` = 1) গ্রাহকদের সব অর্ডার দেখুন, সব column।",
+    "hint": "`WHERE customer_id IN (SELECT id FROM customers WHERE …)`",
+    "solution": "SELECT * FROM orders WHERE customer_id IN (SELECT id FROM customers WHERE district_id = 1);",
+    "check": "rows"
+}

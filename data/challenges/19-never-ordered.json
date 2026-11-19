@@ -1,0 +1,9 @@
+{
+    "title": "কখনো অর্ডার দেননি যারা",
+    "level": "কঠিন",
+    "learn": "left-join",
+    "task": "যেসব গ্রাহক কখনো অর্ডার দেননি, তাদের নাম দেখুন।",
+    "hint": "`customers` LEFT JOIN `orders`, তারপর যেখানে অর্ডার মেলেনি: `WHERE o.id IS NULL`।",
+    "solution": "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;",
+    "check": "rows"
+}
