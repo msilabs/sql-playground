@@ -197,7 +197,8 @@
         var chips = el('ol', 'steps');
         var chipButtons = phases.map(function (p, i) {
             var li = el('li');
-            var b = el('button', '', p === 'final' ? '✓ ' + final.label : bn(i + 1) + '. ' + ui.tracePhase[p]);
+            var name = p === 'read' && trace.tables.length > 1 ? ui.tracePhaseJoinRead : ui.tracePhase[p];
+            var b = el('button', '', p === 'final' ? '✓ ' + final.label : bn(i + 1) + '. ' + name);
             b.type = 'button';
             b.addEventListener('click', function () { stop(); go(firstOf[p]); });
             li.appendChild(b);
@@ -304,8 +305,12 @@
                 body.appendChild(acc);
             }
             var grid = el('div', 'trace-grid');
-            var srcTable = V.table({ columns: trace.table.columns, rows: trace.table.rows, states: f.src, cur: f.cur, pk: trace.table.pk, maxHeight: '17rem', label: trace.table.name });
-            grid.appendChild(section(ui.traceTable(trace.table.name), srcTable));
+            var srcTables = trace.tables.map(function (t, k) {
+                var tbl = V.table({ columns: t.columns, rows: t.rows, states: f.src[k], cur: f.cur[k], pk: t.pk, maxHeight: t.role === 'only' ? '17rem' : '14rem', label: t.name });
+                var title = t.role === 'outer' ? ui.traceOuter(t.name, t.alias) : t.role === 'inner' ? ui.traceInner(t.name, t.alias) : ui.traceTable(t.name);
+                grid.appendChild(section(title, tbl));
+                return tbl;
+            });
             if (f.box) {
                 grid.appendChild(section(ui.traceBox(f.box.rows.length), f.box.rows.length
                     ? V.table({ columns: f.box.columns, rows: f.box.rows, states: f.box.states, maxHeight: '14rem', label: ui.traceBox(f.box.rows.length) })
@@ -316,8 +321,10 @@
                 : el('p', 'res-empty', ui.traceOutEmpty)));
             body.appendChild(grid);
             // চলতি row-টা table-এর মাঝখানে আনা (পেজ নিজে scroll না করে)
-            var row = srcTable.querySelector('tr.st-current');
-            if (row) srcTable.scrollTop = row.offsetTop - srcTable.clientHeight / 2;
+            srcTables.forEach(function (tbl) {
+                var row = tbl.querySelector('tr.st-current');
+                if (row) tbl.scrollTop = row.offsetTop - tbl.clientHeight / 2;
+            });
         }
 
         if (total) {

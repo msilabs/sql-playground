@@ -280,6 +280,12 @@ kbd { padding: 1px 6px; border: 1px solid var(--line); border-radius: 6px; backg
 .tbl .mark.box, .tbl .mark.cur { color: var(--accent); }
 .tbl .mark.discard, .tbl .mark.dup, .tbl .mark.offset { color: var(--bad); }
 .tbl .mark.done { color: var(--muted); }
+.tbl .mark.hit { color: var(--ok); }
+.tbl .mark.miss, .tbl .mark.nomatch { color: var(--bad); }
+.tbl .mark.indexed, .tbl .mark.paired { color: var(--muted); font-weight: 500; }
+.tbl tr.st-hit td { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.tbl tr.st-miss td:not(.mark):not(.rn), .tbl tr.st-paired td:not(.mark):not(.rn) { opacity: .5; }
+.tbl tr.st-nomatch td:not(.mark):not(.rn) { opacity: .45; }
 @keyframes cur-in { from { background: color-mix(in srgb, var(--accent) 40%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .tbl tr.st-current td { animation: none; } }
 .insight-empty { margin: 0; color: var(--muted); font-size: 14px; }

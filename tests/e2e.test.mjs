@@ -138,7 +138,8 @@ test('e2e: Playground-এ JOIN-এর ছবি, Undo, রিলোডের প
     await type('.pg-editor', 'SELECT c.name, d.name FROM customers c LEFT JOIN districts d ON d.id = c.district_id');
     await click('.pg-editor .btn.primary');
     await waitFor("[...document.querySelectorAll('.pg-insight .tabs button')].length === 3", 'insight tabs');
-    await waitFor("/যুক্তির ক্রম/.test(document.querySelector('.pg-insight .insight-empty')?.textContent)", 'join has no trace yet');
+    await waitFor("document.querySelectorAll('.pg-insight .trace-sec-title').length >= 3", 'join trace');
+    assert.match(await js("[...document.querySelectorAll('.pg-insight .trace-sec-title')].map((e) => e.textContent).join(' | ')"), /বাইরের লুপ: customers.*ভেতরের লুপ: districts/);
     await js("document.querySelectorAll('.pg-insight .tabs button')[2].click()");
     await waitFor("document.querySelectorAll('.pg-insight .jv path').length > 0", 'join lines');
 
